@@ -97,6 +97,7 @@ quali_Data <- data %>% select()
 #pdf("/Users/julienhubar/Documents/#Master1/HDDA/ProjectAugust/correlation.pdf")
 #corrplot(corr, method = "color", type = "lower", tl.col = "black", tl.pos = "ld", tl.srt = 45)
 #dev.off()
+
 #---------------------------------------------#
 # PART 3.3 : Qualitative variables impact on  #
 #            quantitative one                 #
