@@ -14,15 +14,26 @@ library(colorspace)
 library(visdat)
 library(reshape2)
 library(corrplot)
-
-
+library(tidyverse)
 #---------------------------------------------#
 #           Data pre-processing               #
 #---------------------------------------------#
+data <- hcc.data
+attach(data)
 
+#data %>%
+#  rename(
+#    V1 = Gender,
+#    V2 = Symptoms,
+#    V3 = Alcohol,
+#    V4 = Hepatitis_B_Surface_Antigen,
+#    V5 = Hepatitis_B_e_Antigen,
+#    V6 = Hepatitis_B_Core_Antibody,
+#    V7 = Hepatitis_C_Virus_Antibody,
+#    V8 = Cirrhosis,
+#    V9 = Endemic, 
+#  )
 
-#data <- dplyr::left_join(PatientInfo, Weather, by=c("confirmed_date" = "date", "province" = "province" ))
-## Sample randomly 500 rows
 #set.seed(0)
 #data <- data[sample.int(nrow(data), 500), ]
 #data <- data %>%
@@ -35,18 +46,17 @@ library(corrplot)
 #---------------------------------------------#
 #             Part 2: Missingness             #
 #---------------------------------------------#
-data <- hcc.data
-attach(data)
+
 # Missingness visualisation
-#pdf("/Users/julienhubar/Documents/#Master1/HDDA/ProjectAugust/MissingnessVisualisation.pdf")
+pdf("/Users/julienhubar/Documents/#Master1/HDDA/ProjectAugust/MissingnessVisualisation.pdf")
 vis_miss(data, sort_miss = TRUE)
-#dev.off()
+dev.off()
 
 ## Missingness 
-#columns <- colnames(data)
-#columns_miss <- columns[colSums(is.na(data)) > 0]
+columns <- colnames(data)
+columns_miss <- columns[colSums(is.na(data)) > 0]
 #pdf("/Users/julienhubar/Documents/#Master1/HDDA/ProjectAugust/missingness_patterns.pdf")
-#gg_miss_upset(data, nset = length(columns_miss))
+gg_miss_upset(data, nset = length(columns_miss))
 #dev.off()
 
 ## Missingness rate for each columns
@@ -92,7 +102,5 @@ vis_miss(data, sort_miss = TRUE)
 #---------------------------------------------#
 #     PART 3.4 : Outliers Detection           #
 #---------------------------------------------#
-data <- covid_19_pandemic_belgium_hospitalisations_by_date_and_province
-attach(data)
-summary(covid_19_pandemic_belgium_hospitalisations_by_date_and_province)
+
 
