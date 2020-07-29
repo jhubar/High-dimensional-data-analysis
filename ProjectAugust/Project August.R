@@ -34,15 +34,7 @@ attach(data)
 #    V9 = Endemic, 
 #  )
 
-#set.seed(0)
-#data <- data[sample.int(nrow(data), 500), ]
-#data <- data %>%
-#  mutate(sex = case_when(sex == 'male' ~ 1,sex == 'female' ~ 0 )) %>%
-#  mutate(age = case_when(age == '10s' ~ 10,age == '20s' ~ 20,age == '30s' ~ 30,age == '40s' ~ 40,age == '50s' ~ 50,
-#                         age == '60s' ~ 60,age == '70s' ~ 70,age == '80s' ~ 80,age == '90s' ~ 90))
-#mean(data$sex,na.rm = TRUE)
-#summary(data)
-#attach(data)
+
 #---------------------------------------------#
 #             Part 2: Missingness             #
 #---------------------------------------------#
@@ -83,10 +75,9 @@ for (i in 1:length(columns_miss)) {
 #      Part 3: Explanatory analysis           #
 #---------------------------------------------#
 
-#quanti_Data <- data %>%
-#  select("patient_id","sex","age","infected_by","contact_number","symptom_onset_date","avg_temp","min_temp","max_temp",
-#        "precipitation","max_wind_speed","most_wind_direction","avg_relative_humidity","code")
-#quali_Data <- data %>% select("country","province","city","infection_case","state","symptom_onset_date","confirmed_date","deceased_date")
+quanti_Data <- data %>%
+  select()
+quali_Data <- data %>% select()
 
 #---------------------------------------------#
 #  Part 3.1: Univariate exploratory analysis  #
