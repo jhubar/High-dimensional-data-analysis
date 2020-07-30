@@ -139,6 +139,7 @@ quali_cols <- c("V1","V2","V3","V4","V5","V6","V7","V8","V9","V10","V11","V12",
 
 # Impact of gender 
 par(mfrow=c(3,2))
+pdf(file = 'Users/julienhubar/Documents/#Master1/HDDA/ProjectAugust/boxplot1V1.pdf')
 boxplot(V24~V1)
 boxplot(V25~V1)
 boxplot(V26~V1)
@@ -237,12 +238,38 @@ boxplot(V48~V11)
 boxplot(V49~V11)
 dev.off()
 
-
-data.quanti_cols <- data[c("V10", quanti_cols)]
-data.quanti_cols <- melt(data.quanti_cols, id.vars = "V10")
-plt <- ggplot(data = data.quanti_cols, aes(x = V50)) + geom_boxplot() 
-plt <- plt + facet_wrap( ~ variable, scales = "free") + labs(x = "10", y = "")
-plt
+#Imparct of obesity
+par(mfrow=c(3,2))
+boxplot(V24~V12)
+boxplot(V25~V12)
+boxplot(V26~V12)
+boxplot(V30~V12)
+boxplot(V31~V12)
+boxplot(V32~V12)
+dev.off()
+par(mfrow=c(3,2))
+boxplot(V33~V12)
+boxplot(V34~V12)
+boxplot(V35~V12)
+boxplot(V36~V12)
+boxplot(V37~V12)
+boxplot(V38~V12)
+dev.off()
+par(mfrow=c(3,2))
+boxplot(V39~V12)
+boxplot(V40~V12)
+boxplot(V41~V12)
+boxplot(V42~V12)
+boxplot(V43~V12)
+boxplot(V44~V12)
+dev.off()
+par(mfrow=c(3,2))
+boxplot(V45~V12)
+boxplot(V46~V12)
+boxplot(V47~V12)
+boxplot(V48~V12)
+boxplot(V49~V12)
+dev.off()
 #---------------------------------------------#
 #     PART 3.4 : Outliers Detection           #
 #---------------------------------------------#
