@@ -15,6 +15,9 @@ library(visdat)
 library(reshape2)
 library(corrplot)
 library(tidyverse)
+library(reshape2)
+library(car)
+library(rgl)
 #---------------------------------------------#
 #           Data pre-processing               #
 #---------------------------------------------#
@@ -31,7 +34,8 @@ attach(data)
 #    V6 = Hepatitis_B_Core_Antibody,
 #    V7 = Hepatitis_C_Virus_Antibody,
 #    V8 = Cirrhosis,
-#    V9 = Endemic, 
+#    V9 = Endemic,
+#    V10 = Smoking
 #  )
 
 
@@ -56,7 +60,7 @@ gg_miss_upset(data, nset = length(columns_miss))
 nb_na <- colSums(is.na(data[, columns_miss]))
 barplot(nb_na / nrow(data), legend.text = nb_na, col = rainbow_hcl(length(columns_miss)))
 #dev.off()
-
+data <- hcc.data
 ## Z(i, j) = z-score of mean(i | is.na(j)) as an estimator of mean(i)
 Z <- matrix(NA, length(columns), length(columns_miss))
 rownames(Z) <- columns
@@ -70,34 +74,57 @@ for (i in 1:length(columns_miss)) {
   Z[, i] <- (means_NA - means) / (stds / sqrt(n_NA))
 }
 
+#---------------------------------------------#
+#  Part 2.1: Strategy to treat missing data   #
+#---------------------------------------------#
+
+for(i in 1:ncol(data)){
+  data[is.na(data[,i]), i] <- mean(data[,i], na.rm = TRUE)
+}
 
 #---------------------------------------------#
 #      Part 3: Explanatory analysis           #
 #---------------------------------------------#
 
-quanti_Data <- data %>% select("V1","V2","V3","V4","V5","V6","V7","V8","V9","V10","V10","V12","V10","V12",
+quali_Data <- data %>% select("V1","V2","V3","V4","V5","V6","V7","V8","V9","V10","V11","V12",
                                "V13","V14","V15","V16","V17","V18","V19","V20","V21","V22","V23","V27","V28","V29")
 
-quali_Data <- data %>% select("V25","V26","V22","V23","V30","V31","V32","V33","V34","V35","V36","V37","V38","V39"
-                              ,"V40","V41","V42","V43","V44","V45","V46","V47","V48","V49","V50")
+
+quanti_Data <- data %>% select("V24","V25","V26","V30","V31","V32","V33","V34","V35","V36","V37","V38","V39"
+                              ,"V40","V41","V42","V43","V44","V45","V46","V47","V48","V49")
 
 #---------------------------------------------#
 #  Part 3.1: Univariate exploratory analysis  #
 #---------------------------------------------#
-#summary(quanti_Data)
+summary(data)
 
-#melted <- melt(quanti_Data)
-#plt <- ggplot(melted, aes(x = value)) + geom_histogram()
-#plt <- plt + facet_wrap( ~ variable, scales = "free") + labs(x = "", y = "")
-#ggsave("/Users/julienhubar/Documents/#Master1/HDDA/ProjectAugust/histograms.pdf", plt)
+# Proportion Men/Woman
+gender <- table(V1)
+pie(gender)
+
+#smoking rate 
+smoking <- table(V10)
+pie(smoking)
+pairs(quali_Data)
+
+melted <- melt(quanti_Data)
+plt <- ggplot(melted, aes(x = value)) + geom_histogram()
+plt <- plt + facet_wrap( ~ variable, scales = "free") + labs(x = "", y = "")
+ggsave("/Users/julienhubar/Documents/#Master1/HDDA/ProjectAugust/histograms.pdf", plt)
+
+melted <- melt(quali_Data)
+plt <- ggplot(melted, aes(x = value, y = value)) +  geom_bar(stat="identity", width=1) + coord_polar("y", start=0)
+plt <- plt + facet_wrap( ~ variable, scales = "free") + labs(x = "", y = "")
+ggsave("/Users/julienhubar/Documents/#Master1/HDDA/ProjectAugust/histograms.pdf", plt)
 
 #---------------------------------------------#
 # Part 3.2: Multivariate exploratory analysis #
 #---------------------------------------------#
 
-#corr <- data
+# correlation between varibles
+corr <- cor(data)
 #pdf("/Users/julienhubar/Documents/#Master1/HDDA/ProjectAugust/correlation.pdf")
-#corrplot(corr, method = "color", type = "lower", tl.col = "black", tl.pos = "ld", tl.srt = 45)
+corrplot(corr, method = "circle", type = "lower", tl.col = "black", tl.pos = "ld", tl.srt = 45)
 #dev.off()
 
 #---------------------------------------------#
@@ -105,8 +132,51 @@ quali_Data <- data %>% select("V25","V26","V22","V23","V30","V31","V32","V33","V
 #            quantitative one                 #
 #---------------------------------------------#
 
+quanti_cols <- c("V24","V25","V26","V30","V31","V32","V33","V34","V35","V36","V37","V38","V39"
+                 ,"V40","V41","V42","V43","V44","V45","V46","V47","V48","V49")
+quali_cols <- c("V1","V2","V3","V4","V5","V6","V7","V8","V9","V10","V11","V12",
+                "V13","V14","V15","V16","V17","V18","V19","V20","V21","V22","V23","V27","V28","V29")
+
+summary(quanti_Data)
+
+
+
+data.quali_cols <- data[c("V50", quali_cols)]
+data.quali_cols <- melt(data.quali_cols, id.vars = "V50")
+plt <- ggplot(data = data.quali_cols, aes(x = V50, y = value)) + geom_boxplot() 
+plt <- plt + facet_wrap( ~ variable, scales = "free") + labs(x = "V50", y = "")
+plt
 #---------------------------------------------#
 #     PART 3.4 : Outliers Detection           #
 #---------------------------------------------#
+
+
+quanti_cols <- c("V24","V25","V26","V30","V31","V32","V33","V34","V35","V36","V37","V38","V39"
+                 ,"V40","V41","V42","V43","V44","V45","V46","V47","V48","V49")
+quali_cols <- c("V1","V2","V3","V4","V5","V6","V7","V8","V9","V10","V11","V12",
+                "V13","V14","V15","V16","V17","V18","V19","V20","V21","V22","V23","V27","V28","V29")
+
+
+# Mahalanobis distance
+mean_vec <- colMeans(quanti_Data)
+cova <- cov(quanti_Data)
+maha <- mahalanobis(quanti_Data, mean_vec, cova)
+
+temp <- as.data.frame(matrix(maha, ncol = 1))
+temp$index = as.numeric(rownames(temp))
+
+plt <- ggplot(temp, aes(x = index, y = V1))
+plt <- plt + geom_bar(stat = "identity")
+plt <- plt + labs(x = "Index", y = "Mahalanobis distance")
+plt <- plt + geom_hline(yintercept = qchisq(0.95, length(quanti_cols)), linetype = "dashed", color = "red")
+
+
+maha_outliers <- sum(temp$V1 > qchisq(0.95, length(quanti_cols)))
+
+plt <- ggplot(temp, aes(y = V1))
+plt <- plt + geom_boxplot()
+plt <- plt + labs(x = "",  y = "Mahalanobis distance")
+plt <- plt + theme(axis.text.x = element_blank(), axis.ticks.x = element_blank())
+
 
 
