@@ -45,7 +45,7 @@ attach(data)
 
 # Missingness visualisation
 pdf("/Users/julienhubar/Documents/#Master1/HDDA/ProjectAugust/MissingnessVisualisation.pdf")
-vis_miss(data, sort_miss = TRUE)
+vis_miss(hcc.data, sort_miss = TRUE)
 dev.off()
 
 ## Missingness 
@@ -113,8 +113,9 @@ plt <- plt + facet_wrap( ~ variable, scales = "free") + labs(x = "", y = "")
 ggsave("/Users/julienhubar/Documents/#Master1/HDDA/ProjectAugust/histograms.pdf", plt)
 
 melted <- melt(quali_Data)
-plt <- ggplot(melted, aes(x = value, y = value)) +  geom_bar(stat="identity", width=1) + coord_polar("y", start=0)
+plt <- ggplot(melted, aes(x = value)) +  geom_histogram()
 plt <- plt + facet_wrap( ~ variable, scales = "free") + labs(x = "", y = "")
+plt
 ggsave("/Users/julienhubar/Documents/#Master1/HDDA/ProjectAugust/histograms.pdf", plt)
 
 #---------------------------------------------#
@@ -125,7 +126,7 @@ ggsave("/Users/julienhubar/Documents/#Master1/HDDA/ProjectAugust/histograms.pdf"
 corr <- cor(data)
 #pdf("/Users/julienhubar/Documents/#Master1/HDDA/ProjectAugust/correlation.pdf")
 corrplot(corr, method = "circle", type = "lower", tl.col = "black", tl.pos = "ld", tl.srt = 45)
-#dev.off()
+dev.off()
 
 #---------------------------------------------#
 # PART 3.3 : Qualitative variables impact on  #
@@ -137,9 +138,10 @@ quanti_cols <- c("V24","V25","V26","V30","V31","V32","V33","V34","V35","V36","V3
 quali_cols <- c("V1","V2","V3","V4","V5","V6","V7","V8","V9","V10","V11","V12",
                 "V13","V14","V15","V16","V17","V18","V19","V20","V21","V22","V23","V27","V28","V29","V50")
 
+
 # Impact of gender 
 par(mfrow=c(3,2))
-pdf(file = 'Users/julienhubar/Documents/#Master1/HDDA/ProjectAugust/boxplot1V1.pdf')
+#pdf(file = 'Users/julienhubar/Documents/#Master1/HDDA/ProjectAugust/boxplot1V1.pdf')
 boxplot(V24~V1)
 boxplot(V25~V1)
 boxplot(V26~V1)
@@ -205,7 +207,7 @@ boxplot(V48~V10)
 boxplot(V49~V10)
 dev.off()
 
-# Impact of Smoking 
+# Impact of Diabetes 
 par(mfrow=c(3,2))
 boxplot(V24~V11)
 boxplot(V25~V11)
@@ -294,7 +296,7 @@ plt <- ggplot(temp, aes(x = index, y = V1))
 plt <- plt + geom_bar(stat = "identity")
 plt <- plt + labs(x = "Index", y = "Mahalanobis distance")
 plt <- plt + geom_hline(yintercept = qchisq(0.95, length(quanti_cols)), linetype = "dashed", color = "red")
-
+plt
 
 maha_outliers <- sum(temp$V1 > qchisq(0.95, length(quanti_cols)))
 
@@ -302,6 +304,7 @@ plt <- ggplot(temp, aes(y = V1))
 plt <- plt + geom_boxplot()
 plt <- plt + labs(x = "",  y = "Mahalanobis distance")
 plt <- plt + theme(axis.text.x = element_blank(), axis.ticks.x = element_blank())
+plt
 
 
 
