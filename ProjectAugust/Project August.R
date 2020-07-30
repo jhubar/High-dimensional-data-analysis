@@ -137,9 +137,13 @@ quanti_cols <- c("V24","V25","V26","V30","V31","V32","V33","V34","V35","V36","V3
 quali_cols <- c("V1","V2","V3","V4","V5","V6","V7","V8","V9","V10","V11","V12",
                 "V13","V14","V15","V16","V17","V18","V19","V20","V21","V22","V23","V27","V28","V29")
 
-summary(quanti_Data)
+bp<-ggplot(quanti_Data, aes(x=V1, y=Index, fill=V1)) +
+  geom_boxplot()
+bp
 
-
+# Nuage de points
+sp<-ggplot(quanti_Data, aes(x=wt, y=index, color=V10)) + geom_point()
+sp
 
 data.quali_cols <- data[c("V50", quali_cols)]
 data.quali_cols <- melt(data.quali_cols, id.vars = "V50")
@@ -150,11 +154,12 @@ plt
 #     PART 3.4 : Outliers Detection           #
 #---------------------------------------------#
 
+quali_cols <- c("V1","V2","V3","V4","V5","V6","V7","V8","V9","V10","V11","V12",
+                "V13","V14","V15","V16","V17","V18","V19","V20","V21","V22","V23","V27","V28","V29")
 
 quanti_cols <- c("V24","V25","V26","V30","V31","V32","V33","V34","V35","V36","V37","V38","V39"
                  ,"V40","V41","V42","V43","V44","V45","V46","V47","V48","V49")
-quali_cols <- c("V1","V2","V3","V4","V5","V6","V7","V8","V9","V10","V11","V12",
-                "V13","V14","V15","V16","V17","V18","V19","V20","V21","V22","V23","V27","V28","V29")
+
 
 
 # Mahalanobis distance
