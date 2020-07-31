@@ -218,6 +218,7 @@ quanti_cols <- c("V24","V30","V31","V32","V33",
 
 # /!\ IL est interressant de voir que la plupart des patients atteint d'une ciroses meurt du HCC
 table(V3,V50)
+ggsave(plot=table(V3,V50), filename = "tableV3V50.pdf")
 table(V4,V50)
 table(V6,V50)
 table(V7,V50)
@@ -225,12 +226,10 @@ table(V8,V50)
 table(V1,V3)
 table(V1,V8)
 
-pdf("pairs_quali_Data.pdf")
-pairs(V1,V3,V4,V6,V7,V8)
-dev.off()
-
+data_test <- data %>% select("V30","V32",
+                             "V36","V38","V39","V40","V41")
 pdf("pairs_qunati_Data.pdf")
-pairs(quanti_Data)
+pairs(data_test)
 dev.off()
 # Impact of gender
 pdf("boxplot1V1.pdf")
