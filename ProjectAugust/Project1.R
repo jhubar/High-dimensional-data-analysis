@@ -216,14 +216,22 @@ quanti_cols <- c("V24","V30","V31","V32","V33",
                  "V34","V35","V36","V37","V38","V39","V40","V41","V42","V43","V44",
                  "V45")
 
-# /!\ IL est interressant de voir que la plupart des patient atteint d'une cirroses meurt du HCC
+# /!\ IL est interressant de voir que la plupart des patients atteint d'une ciroses meurt du HCC
 table(V3,V50)
 table(V4,V50)
 table(V6,V50)
 table(V7,V50)
 table(V8,V50)
+table(V1,V3)
+table(V1,V8)
 
+pdf("pairs_quali_Data.pdf")
+pairs(V1,V3,V4,V6,V7,V8)
+dev.off()
 
+pdf("pairs_qunati_Data.pdf")
+pairs(quanti_Data)
+dev.off()
 # Impact of gender
 pdf("boxplot1V1.pdf")
 par(mfrow=c(2,4))
