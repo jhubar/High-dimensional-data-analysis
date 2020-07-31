@@ -23,11 +23,13 @@ library(rgl)
 data <- read.table("hcc-data.txt", header = FALSE, na.strings = "?", sep = ",")
 attach(data)
 
+
+quali_Data <- data %>% select("V1","V2","V3","V4","V5","V6","V7","V8","V9","V10","V11","V12",
+                              "V13","V14","V15","V16","V17","V18","V19","V20","V21","V22","V23","V27","V28","V29")
 quanti_Data <- data %>% select("V24","V25","V26","V30","V31","V32","V33","V34","V35","V36","V37","V38","V39"
                                ,"V40","V41","V42","V43","V44","V45","V46","V47","V48","V49")
 
-quanti_Data <- data %>% select("V24","V25","V26","V30","V31","V32","V33","V34","V35","V36","V37","V38","V39"
-                               ,"V40","V41","V42","V43","V44","V45","V46","V47","V48","V49")
+
 
 pdf("hist1-6.pdf")
 par(mfrow=c(3,2))
@@ -75,7 +77,12 @@ hist(V28)
 hist(V29)
 dev.off()
 
-# Missingness visualisation
+# Missingness visualisation quali
+pdf("MissingnessVisualisation_Quali.pdf")
+vis_miss(quali_Data, sort_miss = TRUE)
+dev.off()
+
+# Missingness visualisation quanti
 pdf("MissingnessVisualisation_Quanti.pdf")
 vis_miss(quanti_Data, sort_miss = TRUE)
 dev.off()
