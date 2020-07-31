@@ -167,196 +167,153 @@ quanti_Data <- data %>% select("V24","V30","V31","V32","V33",
                                "V34","V35","V36","V37","V38","V39","V40","V41","V42","V43","V44",
                                "V45")
 
-
-
 #---------------------------------------------#
 #  Part 3.1: Univariate exploratory analysis  #
 #---------------------------------------------#
-summary(data)
-
-# Proportion Men/Woman
-test <- table(V1,V24)
-pie(gender)
-
-#smoking rate 
-smoking <- table(V10)
-pie(smoking)
-pairs(quali_Data)
 
 melted <- melt(quanti_Data)
 plt <- ggplot(melted, aes(x = value)) + geom_histogram()
 plt <- plt + facet_wrap( ~ variable, scales = "free") + labs(x = "", y = "")
-ggsave("/Users/julienhubar/Documents/#Master1/HDDA/ProjectAugust/histograms.pdf", plt)
+ggsave("histograms_quanti.pdf", plt)
 
 melted <- melt(quali_Data)
-plt <- ggplot(melted, aes(x = value)) +  geom_histogram()
+plt <- ggplot(melted, aes(x = value)) + geom_histogram()
 plt <- plt + facet_wrap( ~ variable, scales = "free") + labs(x = "", y = "")
-plt
-ggsave("/Users/julienhubar/Documents/#Master1/HDDA/ProjectAugust/histograms.pdf", plt)
+ggsave("histograms_quali.pdf", plt)
+
 
 #---------------------------------------------#
 # Part 3.2: Multivariate exploratory analysis #
 #---------------------------------------------#
 
 # correlation between varibles
-corr <- cor(data)
-#pdf("/Users/julienhubar/Documents/#Master1/HDDA/ProjectAugust/correlation.pdf")
+corr <- cor(data[,24:30])
+pdf("correlation.pdf")
 corrplot(corr, method = "circle", type = "lower", tl.col = "black", tl.pos = "ld", tl.srt = 45)
+dev.off()
+
+# correlation btw quali varibles
+corr_quali <- cor(quali_Data)
+pdf("correlation_quali.pdf")
+corrplot(corr_quali, method = "circle", type = "lower", tl.col = "black", tl.pos = "ld", tl.srt = 45)
+dev.off()
+
+# correlation btw quali varibles
+corr_quanti <- cor(quanti_Data)
+pdf("correlation_quanti.pdf")
+corrplot(corr_quanti, method = "circle", type = "lower", tl.col = "black", tl.pos = "ld", tl.srt = 45)
 dev.off()
 
 #---------------------------------------------#
 # PART 3.3 : Qualitative variables impact on  #
 #            quantitative one                 #
 #---------------------------------------------#
+quali_cols <- c("V1","V2","V3","V4","V6","V7","V8","V11","V12",
+                "V13","V14","V15","V16","V17","V19","V20","V21","V22","V23",
+                "V27","V28","V29","V50")
 
-quanti_cols <- c("V24","V25","V26","V30","V31","V32","V33","V34","V35","V36","V37","V38","V39"
-                 ,"V40","V41","V42","V43","V44","V45","V46","V47","V48","V49")
-quali_cols <- c("V1","V2","V3","V4","V5","V6","V7","V8","V9","V10","V11","V12",
-                "V13","V14","V15","V16","V17","V18","V19","V20","V21","V22","V23","V27","V28","V29","V50")
+quanti_cols <- c("V24","V30","V31","V32","V33",
+                 "V34","V35","V36","V37","V38","V39","V40","V41","V42","V43","V44",
+                 "V45")
 
 
-# Impact of gender 
-par(mfrow=c(3,2))
-#pdf(file = 'Users/julienhubar/Documents/#Master1/HDDA/ProjectAugust/boxplot1V1.pdf')
+
+# Impact of gender
+pdf("boxplot1V1.pdf")
+par(mfrow=c(2,4))
 boxplot(V24~V1)
-boxplot(V25~V1)
-boxplot(V26~V1)
 boxplot(V30~V1)
 boxplot(V31~V1)
 boxplot(V32~V1)
-dev.off()
-par(mfrow=c(3,2))
 boxplot(V33~V1)
 boxplot(V34~V1)
 boxplot(V35~V1)
 boxplot(V36~V1)
 boxplot(V37~V1)
 boxplot(V38~V1)
-dev.off()
-par(mfrow=c(3,2))
 boxplot(V39~V1)
 boxplot(V40~V1)
 boxplot(V41~V1)
 boxplot(V42~V1)
 boxplot(V43~V1)
 boxplot(V44~V1)
-dev.off()
-par(mfrow=c(3,2))
 boxplot(V45~V1)
-boxplot(V46~V1)
-boxplot(V47~V1)
-boxplot(V48~V1)
-boxplot(V49~V1)
 dev.off()
 
-
-# Impact of Smoking 
-par(mfrow=c(3,2))
-boxplot(V24~V10)
-boxplot(V25~V10)
-boxplot(V26~V10)
-boxplot(V30~V10)
-boxplot(V31~V10)
-boxplot(V32~V10)
-dev.off()
-par(mfrow=c(3,2))
-boxplot(V33~V10)
-boxplot(V34~V10)
-boxplot(V35~V10)
-boxplot(V36~V10)
-boxplot(V37~V10)
-boxplot(V38~V10)
-dev.off()
-par(mfrow=c(3,2))
-boxplot(V39~V10)
-boxplot(V40~V10)
-boxplot(V41~V10)
-boxplot(V42~V10)
-boxplot(V43~V10)
-boxplot(V44~V10)
-dev.off()
-par(mfrow=c(3,2))
-boxplot(V45~V10)
-boxplot(V46~V10)
-boxplot(V47~V10)
-boxplot(V48~V10)
-boxplot(V49~V10)
+# Impact of Alcohol
+pdf("boxplot1V3.pdf")
+par(mfrow=c(2,4))
+boxplot(V24~V3)
+boxplot(V30~V3)
+boxplot(V31~V3)
+boxplot(V32~V3)
+boxplot(V33~V3)
+boxplot(V34~V3)
+boxplot(V35~V3)
+boxplot(V36~V3)
+boxplot(V37~V3)
+boxplot(V38~V3)
+boxplot(V39~V3)
+boxplot(V40~V3)
+boxplot(V41~V3)
+boxplot(V42~V3)
+boxplot(V43~V3)
+boxplot(V44~V3)
+boxplot(V45~V3)
 dev.off()
 
 # Impact of Diabetes 
-par(mfrow=c(3,2))
+pdf("boxplot1V11.pdf")
+par(mfrow=c(2,4))
 boxplot(V24~V11)
-boxplot(V25~V11)
-boxplot(V26~V11)
 boxplot(V30~V11)
 boxplot(V31~V11)
 boxplot(V32~V11)
-dev.off()
-par(mfrow=c(3,2))
 boxplot(V33~V11)
 boxplot(V34~V11)
 boxplot(V35~V11)
 boxplot(V36~V11)
 boxplot(V37~V11)
 boxplot(V38~V11)
-dev.off()
-par(mfrow=c(3,2))
 boxplot(V39~V11)
 boxplot(V40~V11)
 boxplot(V41~V11)
 boxplot(V42~V11)
 boxplot(V43~V11)
 boxplot(V44~V11)
-dev.off()
-par(mfrow=c(3,2))
 boxplot(V45~V11)
-boxplot(V46~V11)
-boxplot(V47~V11)
-boxplot(V48~V11)
-boxplot(V49~V11)
 dev.off()
 
 #Imparct of obesity
-par(mfrow=c(3,2))
+pdf("boxplot1V12.pdf")
+par(mfrow=c(2,4))
 boxplot(V24~V12)
-boxplot(V25~V12)
-boxplot(V26~V12)
 boxplot(V30~V12)
 boxplot(V31~V12)
 boxplot(V32~V12)
-dev.off()
-par(mfrow=c(3,2))
 boxplot(V33~V12)
 boxplot(V34~V12)
 boxplot(V35~V12)
 boxplot(V36~V12)
 boxplot(V37~V12)
 boxplot(V38~V12)
-dev.off()
-par(mfrow=c(3,2))
 boxplot(V39~V12)
 boxplot(V40~V12)
 boxplot(V41~V12)
 boxplot(V42~V12)
 boxplot(V43~V12)
 boxplot(V44~V12)
-dev.off()
-par(mfrow=c(3,2))
 boxplot(V45~V12)
-boxplot(V46~V12)
-boxplot(V47~V12)
-boxplot(V48~V12)
-boxplot(V49~V12)
 dev.off()
 #---------------------------------------------#
 #     PART 3.4 : Outliers Detection           #
 #---------------------------------------------#
 
-quali_cols <- c("V1","V2","V3","V4","V5","V6","V7","V8","V9","V10","V11","V12",
-                "V13","V14","V15","V16","V17","V18","V19","V20","V21","V22","V23","V27","V28","V29")
+quali_cols <- c("V1","V2","V3","V4","V6","V7","V8","V11","V12",
+                "V13","V14","V15","V16","V17","V19","V20","V21","V22","V23","V27","V28","V29","V50")
 
-quanti_cols <- c("V24","V25","V26","V30","V31","V32","V33","V34","V35","V36","V37","V38","V39"
-                 ,"V40","V41","V42","V43","V44","V45","V46","V47","V48","V49")
+quanti_cols <- c("V24","V30","V31","V32","V33","V34","V35","V36","V37","V38","V39"
+                 ,"V40","V41","V42","V43","V44","V45")
 
 
 
@@ -368,19 +325,21 @@ maha <- mahalanobis(quanti_Data, mean_vec, cova)
 temp <- as.data.frame(matrix(maha, ncol = 1))
 temp$index = as.numeric(rownames(temp))
 
+pdf("Mahalanobis distance.pdf")
 plt <- ggplot(temp, aes(x = index, y = V1))
 plt <- plt + geom_bar(stat = "identity")
 plt <- plt + labs(x = "Index", y = "Mahalanobis distance")
 plt <- plt + geom_hline(yintercept = qchisq(0.95, length(quanti_cols)), linetype = "dashed", color = "red")
 plt
+dev.off()
 
 maha_outliers <- sum(temp$V1 > qchisq(0.95, length(quanti_cols)))
-
+pdf("Mahalanobis distance box.pdf")
 plt <- ggplot(temp, aes(y = V1))
 plt <- plt + geom_boxplot()
 plt <- plt + labs(x = "",  y = "Mahalanobis distance")
 plt <- plt + theme(axis.text.x = element_blank(), axis.ticks.x = element_blank())
 plt
-
+dev.off()
 
 
