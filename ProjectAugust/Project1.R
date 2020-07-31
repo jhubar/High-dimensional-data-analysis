@@ -1,5 +1,4 @@
-
-
+setwd("/Users/julienhubar/Documents/#Master1/HDDA/High-dimensional-data-analysis/ProjectAugust")
 #---------------------------------------------#
 #                 Library                     #
 #---------------------------------------------#
@@ -21,7 +20,7 @@ library(rgl)
 #---------------------------------------------#
 #           Data pre-processing               #
 #---------------------------------------------#
-data <- hcc.data
+data <- read.table("hcc-data.txt", header = FALSE, na.strings = "?", sep = ",")
 attach(data)
 
 #data %>%
