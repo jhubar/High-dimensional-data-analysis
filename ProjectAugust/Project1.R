@@ -25,6 +25,7 @@ attach(data)
 
 quali_cols <- c("V1","V2","V3","V4","V5","V6","V7","V8","V9","V10","V11","V12",
                 "V13","V14","V15","V16","V17","V18","V19","V20","V21","V22","V23","V27","V28","V29")
+
 pdf("hist1-6.pdf")
 par(mfrow=c(3,2))
 hist(V1)
@@ -45,7 +46,31 @@ hist(V11)
 hist(V12)
 dev.off()
 
+pdf("hist13-18.pdf")
+par(mfrow=c(3,2))
+hist(V13)
+hist(V14)
+hist(V15)
+hist(V16)
+hist(V17)
+hist(V18)
+dev.off()
 
+pdf("hist19-23.pdf")
+par(mfrow=c(3,2))
+hist(V19)
+hist(V20)
+hist(V21)
+hist(V22)
+hist(V23)
+dev.off()
+
+pdf("hist27-29.pdf")
+par(mfrow=c(3,1))
+hist(V27)
+hist(V28)
+hist(V29)
+dev.off()
 #---------------------------------------------#
 #             Part 2: Missingness             #
 #---------------------------------------------#
