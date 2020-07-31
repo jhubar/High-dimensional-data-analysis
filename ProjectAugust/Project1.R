@@ -25,7 +25,7 @@ attach(data)
 
 
 quali_Data <- data %>% select("V1","V2","V3","V4","V5","V6","V7","V8","V9","V10","V11","V12",
-                              "V13","V14","V15","V16","V17","V18","V19","V20","V21","V22","V23","V27","V28","V29")
+                              "V13","V14","V15","V16","V17","V18","V19","V20","V21","V22","V23","V27","V28","V29","V50")
 quanti_Data <- data %>% select("V24","V25","V26","V30","V31","V32","V33","V34","V35","V36","V37","V38","V39"
                                ,"V40","V41","V42","V43","V44","V45","V46","V47","V48","V49")
 
@@ -77,38 +77,63 @@ hist(V28)
 hist(V29)
 dev.off()
 
-# Missingness visualisation quali
-pdf("MissingnessVisualisation_Quali.pdf")
-vis_miss(quali_Data, sort_miss = TRUE)
-dev.off()
-
-# Missingness visualisation quanti
-pdf("MissingnessVisualisation_Quanti.pdf")
-vis_miss(quanti_Data, sort_miss = TRUE)
-dev.off()
 
 #---------------------------------------------#
 #             Part 2: Missingness             #
 #---------------------------------------------#
 
-# Missingness visualisation
-pdf("MissingnessVisualisation.pdf")
-vis_miss(data, sort_miss = TRUE)
+# Missingness visualisation quali
+pdf("MissingnessVisualisation_Quali.pdf")
+vis_miss(quali_Data, sort_miss = TRUE)
+dev.off()
+
+
+# Missingness visualisation quanti
+pdf("MissingnessVisualisation_Quanti.pdf")
+vis_miss(quanti_Data, sort_miss = TRUE)
+dev.off
+
+# Deletion of columns with more than 20% missing data
+
+data <- data%>% select ("V1","V2","V3","V4","V6","V7","V8","V11","V12",
+         "V13","V14","V15","V16","V17","V19","V20","V21","V22","V23",
+         "V27","V28","V29","V50","V24","V30","V31","V32","V33",
+         "V34","V35","V36","V37","V38","V39","V40","V41","V42","V43","V44",
+         "V45")
+
+quali_Data <- data %>% select("V1","V2","V3","V4","V6","V7","V8","V11","V12",
+                              "V13","V14","V15","V16","V17","V19","V20","V21","V22","V23",
+                              "V27","V28","V29","V50")
+
+quanti_Data <- data %>% select("V24","V30","V31","V32","V33",
+                               "V34","V35","V36","V37","V38","V39","V40","V41","V42","V43","V44",
+                               "V45")
+
+
+# Missingness visualisation quali after deletion
+pdf("MissingnessVisualisation_Quali_after_deletion.pdf")
+vis_miss(quali_Data, sort_miss = TRUE)
+dev.off()
+
+
+# Missingness visualisation quanti after deletion
+pdf("MissingnessVisualisation_Quanti_after_deletion.pdf")
+vis_miss(quanti_Data, sort_miss = TRUE)
 dev.off()
 
 ## Missingness 
 columns <- colnames(data)
 columns_miss <- columns[colSums(is.na(data)) > 0]
-#pdf("/Users/julienhubar/Documents/#Master1/HDDA/ProjectAugust/missingness_patterns.pdf")
+pdf("missingness_patterns.pdf")
 gg_miss_upset(data, nset = length(columns_miss))
-#dev.off()
+dev.off()
 
-## Missingness rate for each columns
-#pdf("/Users/julienhubar/Documents/#Master1/HDDA/ProjectAugust/missingness_rates.pdf")
+# Missingness rate for each columns
+pdf("missingness_rates.pdf")
 nb_na <- colSums(is.na(data[, columns_miss]))
 barplot(nb_na / nrow(data), legend.text = nb_na, col = rainbow_hcl(length(columns_miss)))
-#dev.off()
-data <- hcc.data
+dev.off()
+
 ## Z(i, j) = z-score of mean(i | is.na(j)) as an estimator of mean(i)
 Z <- matrix(NA, length(columns), length(columns_miss))
 rownames(Z) <- columns
@@ -134,12 +159,15 @@ for(i in 1:ncol(data)){
 #      Part 3: Explanatory analysis           #
 #---------------------------------------------#
 
-quali_Data <- data %>% select("V1","V2","V3","V4","V5","V6","V7","V8","V9","V10","V11","V12",
-                               "V13","V14","V15","V16","V17","V18","V19","V20","V21","V22","V23","V27","V28","V29")
+quali_Data <- data %>% select("V1","V2","V3","V4","V6","V7","V8","V11","V12",
+                              "V13","V14","V15","V16","V17","V19","V20","V21","V22","V23",
+                              "V27","V28","V29","V50")
+
+quanti_Data <- data %>% select("V24","V30","V31","V32","V33",
+                               "V34","V35","V36","V37","V38","V39","V40","V41","V42","V43","V44",
+                               "V45")
 
 
-quanti_Data <- data %>% select("V24","V25","V26","V30","V31","V32","V33","V34","V35","V36","V37","V38","V39"
-                              ,"V40","V41","V42","V43","V44","V45","V46","V47","V48","V49")
 
 #---------------------------------------------#
 #  Part 3.1: Univariate exploratory analysis  #
