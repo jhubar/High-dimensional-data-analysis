@@ -83,15 +83,15 @@ dev.off()
 #---------------------------------------------#
 
 # Missingness visualisation quali
-pdf("MissingnessVisualisation_Quali.pdf")
+ggsave("MissingnessVisualisation_Quali.png")
 vis_miss(quali_Data, sort_miss = TRUE)
 dev.off()
 
 
 # Missingness visualisation quanti
-pdf("MissingnessVisualisation_Quanti.pdf")
+ggsave("MissingnessVisualisation_Quanti.png")
 vis_miss(quanti_Data, sort_miss = TRUE)
-dev.off
+dev.off()
 
 # Deletion of columns with more than 20% missing data
 
