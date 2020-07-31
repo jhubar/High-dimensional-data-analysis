@@ -23,27 +23,13 @@ library(rgl)
 data <- read.table("hcc-data.txt", header = FALSE, na.strings = "?", sep = ",")
 attach(data)
 
-#data %>%
-#  rename(
-#    V1 = Gender,
-#    V2 = Symptoms,
-#    V3 = Alcohol,
-#    V4 = Hepatitis_B_Surface_Antigen,
-#    V5 = Hepatitis_B_e_Antigen,
-#    V6 = Hepatitis_B_Core_Antibody,
-#    V7 = Hepatitis_C_Virus_Antibody,
-#    V8 = Cirrhosis,
-#    V9 = Endemic,
-#    V10 = Smoking
-#  )
-
 
 #---------------------------------------------#
 #             Part 2: Missingness             #
 #---------------------------------------------#
 
 # Missingness visualisation
-pdf("/Users/julienhubar/Documents/#Master1/HDDA/ProjectAugust/MissingnessVisualisation.pdf")
+pdf("MissingnessVisualisation.pdf")
 vis_miss(hcc.data, sort_miss = TRUE)
 dev.off()
 
