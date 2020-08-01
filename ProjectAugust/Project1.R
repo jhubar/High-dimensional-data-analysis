@@ -17,6 +17,7 @@ library(tidyverse)
 library(reshape2)
 library(car)
 library(rgl)
+library(gridExtra)
 #---------------------------------------------#
 #           Data pre-processing               #
 #---------------------------------------------#
@@ -30,7 +31,37 @@ quanti_Data <- data %>% select("V24","V25","V26","V30","V31","V32","V33","V34","
                                ,"V40","V41","V42","V43","V44","V45","V46","V47","V48","V49")
 
 
+#---------------------------------------#
 
+
+pdf("hist_.pdf")
+par(mfrow=c(5,5))
+hist(V1)
+hist(V2)
+hist(V3)
+hist(V4)
+hist(V6)
+hist(V7)
+hist(V8)
+hist(V11)
+hist(V12)
+hist(V13)
+hist(V14)
+hist(V15)
+hist(V16)
+hist(V17)
+hist(V19)
+hist(V20)
+hist(V21)
+hist(V22)
+hist(V23)
+hist(V27)
+hist(V28)
+hist(V29)
+hist(V50)
+dev.off()
+
+#---------------------------------------#
 pdf("hist1-6.pdf")
 par(mfrow=c(3,2))
 hist(V1)
@@ -158,7 +189,6 @@ for(i in 1:ncol(data)){
 #---------------------------------------------#
 #      Part 3: Explanatory analysis           #
 #---------------------------------------------#
-
 quali_Data <- data %>% select("V1","V2","V3","V4","V6","V7","V8","V11","V12",
                               "V13","V14","V15","V16","V17","V19","V20","V21","V22","V23",
                               "V27","V28","V29","V50")
@@ -204,6 +234,21 @@ pdf("correlation_quanti.pdf")
 corrplot(corr_quanti, method = "circle", type = "lower", tl.col = "black", tl.pos = "ld", tl.srt = 45)
 dev.off()
 
+specie <- c(rep("V1" , 2) , rep("V2" , 2) , rep("V3" , 2) , rep("V4" , 2),
+            rep("V6" , 2) , rep("V7" , 2) , rep("V8" , 2) , rep("V11" , 2),
+            rep("V12" , 2) , rep("V13" , 2) , rep("V14" , 2) , rep("V15" , 2),
+            rep("V16" , 2) , rep("V17" , 2) , rep("V19" , 2) , rep("V20" , 2),
+            rep("V21" , 2) , rep("V22" , 2) , rep("V23" , 2) , rep("V27" , 6),
+            rep("V28" , 3) , rep("V29" , 3) , rep("V50" , 2) 
+            )
+condition <- rep(c("0" , "1" , "2", "3", "4","5") , 23)
+value <- abs(rnorm(12 , 0 , 15))
+test_data <- data.frame(specie,condition,value)
+boxplot(data$V1)
+
+# Stacked
+ggplot(test_data, aes(fill = condition, y= value, x=specie)) + 
+  geom_bar(position="stack", stat="identity")
 #---------------------------------------------#
 # PART 3.3 : Qualitative variables impact on  #
 #            quantitative one                 #
@@ -217,14 +262,36 @@ quanti_cols <- c("V24","V30","V31","V32","V33",
                  "V45")
 
 # /!\ IL est interressant de voir que la plupart des patients atteint d'une ciroses meurt du HCC
-table(V3,V50)
-ggsave(plot=table(V3,V50), filename = "tableV3V50.pdf")
+
+pdf("tableV1V3.pdf", width=1, height=1)
+df <- table(V1,V3)
+colnames(df) <- c("V1")
+rownames(df) <- c("V3")
+df <- as.table(df)
+grid.table(df)
+dev.off()
+pdf("tablev4V50.pdf", width=1, height=1)
 table(V4,V50)
+dev.off()
+pdf("tableV6V50.pdf", width=1, height=1)
 table(V6,V50)
-table(V7,V50)
-table(V8,V50)
-table(V1,V3)
+dev.off()
+pdf("tableV7V50.pdf", width=1, height=1)
+grid.table(table(V7,V50))
+dev.off()
+pdf("tableV8V50.pdf", width=1, height=1)
+grid.table(table(V8,V50))
+dev.off()
+pdf("tableV1V8.pdf", width=1, height=1)
 table(V1,V8)
+dev.off()
+pdf("tableV3V50.pdf", width=1, height=1)
+table(V3,V50) 
+dev.off()
+
+
+
+
 
 data_test <- data %>% select("V30","V32",
                              "V36","V38","V39","V40","V41")
@@ -275,6 +342,27 @@ boxplot(V44~V3)
 boxplot(V45~V3)
 dev.off()
 
+# Impact of
+pdf("boxplot1V4.pdf")
+par(mfrow=c(2,4))
+boxplot(V24~V4)
+boxplot(V30~V4)
+boxplot(V31~V4)
+boxplot(V32~V4)
+boxplot(V33~V4)
+boxplot(V34~V4)
+boxplot(V35~V4)
+boxplot(V36~V4)
+boxplot(V37~V4)
+boxplot(V38~V4)
+boxplot(V39~V4)
+boxplot(V40~V4)
+boxplot(V41~V4)
+boxplot(V42~V4)
+boxplot(V43~V4)
+boxplot(V44~V4)
+boxplot(V45~V4)
+dev.off()
 # Impact of Diabetes 
 pdf("boxplot1V11.pdf")
 par(mfrow=c(2,4))
@@ -297,6 +385,49 @@ boxplot(V44~V11)
 boxplot(V45~V11)
 dev.off()
 
+# Impact of gender
+pdf("boxplot1V8.pdf")
+par(mfrow=c(2,4))
+boxplot(V24~V8)
+boxplot(V30~V8)
+boxplot(V31~V8)
+boxplot(V32~V8)
+boxplot(V33~V8)
+boxplot(V34~V8)
+boxplot(V35~V8)
+boxplot(V36~V8)
+boxplot(V37~V8)
+boxplot(V38~V8)
+boxplot(V39~V8)
+boxplot(V40~V8)
+boxplot(V41~V8)
+boxplot(V42~V8)
+boxplot(V43~V8)
+boxplot(V44~V8)
+boxplot(V45~V8)
+dev.off()
+
+# Impact of 
+pdf("boxplot1V50.pdf")
+par(mfrow=c(2,4))
+boxplot(V24~V50)
+boxplot(V30~V50)
+boxplot(V31~V50)
+boxplot(V32~V50)
+boxplot(V33~V50)
+boxplot(V34~V50)
+boxplot(V35~V50)
+boxplot(V36~V50)
+boxplot(V37~V50)
+boxplot(V38~V50)
+boxplot(V39~V50)
+boxplot(V40~V50)
+boxplot(V41~V50)
+boxplot(V42~V50)
+boxplot(V43~V50)
+boxplot(V44~V50)
+boxplot(V45~V50)
+dev.off()
 #Imparct of obesity
 pdf("boxplot1V12.pdf")
 par(mfrow=c(2,4))
@@ -348,13 +479,6 @@ plt <- plt + geom_hline(yintercept = qchisq(0.95, length(quanti_cols)), linetype
 plt
 dev.off()
 
-maha_outliers <- sum(temp$V1 > qchisq(0.95, length(quanti_cols)))
-pdf("Mahalanobis distance box.pdf")
-plt <- ggplot(temp, aes(y = V1))
-plt <- plt + geom_boxplot()
-plt <- plt + labs(x = "",  y = "Mahalanobis distance")
-plt <- plt + theme(axis.text.x = element_blank(), axis.ticks.x = element_blank())
-plt
-dev.off()
+
 
 
