@@ -185,7 +185,7 @@ for (i in 1:length(columns_miss)) {
 for(i in 1:ncol(data)){
   data[is.na(data[,i]), i] <- mean(data[,i], na.rm = TRUE)
 }
-
+attach(data)
 #---------------------------------------------#
 #      Part 3: Explanatory analysis           #
 #---------------------------------------------#
@@ -244,11 +244,31 @@ specie <- c(rep("V1" , 2) , rep("V2" , 2) , rep("V3" , 2) , rep("V4" , 2),
 condition <- rep(c("0" , "1" , "2", "3", "4","5") , 23)
 value <- abs(rnorm(12 , 0 , 15))
 test_data <- data.frame(specie,condition,value)
-boxplot(data$V1)
 
-# Stacked
-ggplot(test_data, aes(fill = condition, y= value, x=specie)) + 
-  geom_bar(position="stack", stat="identity")
+pdf("boxplot1.pdf")
+par(mfrow=c(3,3))
+boxplot(V24, xlab = "V24")
+boxplot(V30, xlab = "V30")
+boxplot(V31, xlab = "V31")
+boxplot(V32, xlab = "V32")
+boxplot(V33, xlab = "V33")
+boxplot(V34, xlab = "V34")
+boxplot(V35, xlab = "V35")
+boxplot(V36, xlab = "V36")
+boxplot(V37, xlab = "V37")
+dev.off()
+
+pdf("boxplot2.pdf")
+par(mfrow=c(3,3))
+boxplot(V38, xlab = "V38")
+boxplot(V39, xlab = "V39")
+boxplot(V40, xlab = "V40")
+boxplot(V41, xlab = "V41")
+boxplot(V42, xlab = "V42")
+boxplot(V43, xlab = "V43")
+boxplot(V44, xlab = "V44")
+boxplot(V45, xlab = "V45")
+dev.off()
 #---------------------------------------------#
 # PART 3.3 : Qualitative variables impact on  #
 #            quantitative one                 #
@@ -479,6 +499,12 @@ plt <- plt + geom_hline(yintercept = qchisq(0.95, length(quanti_cols)), linetype
 plt
 dev.off()
 
+pdf("Histo_V34_Lower500.pdf")
+V34_Lower500 <- data.frame(V34)
+V34_Lower500<-Filter(function(x) any(x <500 ), V34)
+hist(V34_Lower500)
+dev.off()
 
-
-
+pdf("HistAge.pdf")
+hist(V24)
+pdf
