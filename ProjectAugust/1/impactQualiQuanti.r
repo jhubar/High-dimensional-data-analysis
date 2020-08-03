@@ -211,7 +211,7 @@ boxplot(V42~V13,varwidth = TRUE)
 boxplot(V43~V13,varwidth = TRUE)
 boxplot(V44~V13,varwidth = TRUE)
 boxplot(V45~V13,varwidth = TRUE)
-dev.off
+dev.off()
 #Imparct of V14
 pdf("boxplotImpactV14.pdf")
 par(mfrow=c(2,4))
