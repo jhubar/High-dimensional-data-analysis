@@ -4,14 +4,14 @@ setwd("/Users/julienhubar/Documents/#Master1/HDDA/High-dimensional-data-analysis
 #                 Library                     #
 #---------------------------------------------#
 
-library(ggplot2)
+
 library(dplyr)
 library(reshape2)
 library(corrplot)
 library(reshape2)
 library(corrplot)
 library(MASS)
-library(qgraph)
+
 
 #---------------------------------------------#
 #           Data pre-processing               #
@@ -19,7 +19,7 @@ library(qgraph)
 
 data <- read.table("hcc-data.txt", header = FALSE, na.strings = "?", sep = ",")
 attach(data)
-data <- data%>% select("V1","V2")
+
 #---------------------------------------------#
 #     Strategy to treat missing data          #
 #---------------------------------------------#
@@ -130,4 +130,57 @@ plt <- plt + facet_wrap( ~ variable, scales = "free") + labs(x = "", y = "")
 ggsave("histograms_robust_all.pdf", plt) 
 
 
+#------------------------------------------------------------------# 
+# PART 3.2 : Further investigation of the correlation              #
+#       structure of the quantitative variables                    #
+#------------------------------------------------------------------# 
+
+## 1. Robust correlation matrix
+h <- floor((dim(quanti_Data)[1] + dim(quanti_Data)[2] + 1) / 2)
+robust <- cov.rob(quanti_Data, cor = TRUE, quantile.used = h, method = "mcd")
+
+classic_cor <- cor(quanti_Data)
+pdf("classic_correlation.pdf")
+corrplot(classic_cor, method = "circle", type = "lower", tl.col = "black", tl.pos = "ld", tl.srt = 45)
+dev.off()
+
+pdf("robust_correlation.pdf")
+corrplot(robust$cor, method = "circle", type = "lower", tl.col = "black", tl.pos = "ld", tl.srt = 45)
+dev.off()
+
+library(qgraph)
+### 2.a Classic covariance
+classic_cov <- cov(quanti_Data)
+qgraph(solve(as.matrix(classic_cov)), fade = FALSE, edge.labels = TRUE, 
+       diag = FALSE, minimum = 1e-3, filetype = "pdf", filename = "qgraph_classic_cov")
+
+### 2.b L1-regularized covariance
+
+#### Optimal lambda using BIC method
+lambda <- seq(0, 1, length.out = 10)
+BIC <- rep(0, 10)
+
+n <- dim(quantitative_data)[1]
+p <- dim(quantitative_data)[2]
+
+for (i in 1:length(lambda)) {
+  l1reg <- huge(classic_cov, lambda[i], method = "glasso", cov.output = TRUE)
+  l1prec <- l1reg$icov[[1]]
+  BIC[i] <- -n * l1reg$loglik +
+    log(n) * (p + sum(l1prec[upper.tri(l1prec, diag = TRUE)] != 0))
+}
+
+plt <- ggplot() + geom_line(aes(x = lambda, y = BIC))
+ggsave(filename = "products/pdf/optimal_lambda.pdf", plt)
+
+lambda <- lambda[which.min(BIC)]
+
+#### L1-regularization with optimal lambda
+l1reg <- huge(classic_cov, lambda, method = "glasso", cov.output = TRUE)
+l1_cov <- l1reg$cov[[1]]
+
+rownames(l1_cov) <- rownames(classic_cov)
+colnames(l1_cov) <- colnames(classic_cov)
+
+qgraph(solve(as.matrix(l1_cov)), fade = FALSE, edge.labels = TRUE, diag = FALSE, minimum = 1e-3, filetype = "pdf", filename = "products/pdf/qgraph_l1_cov")
 
