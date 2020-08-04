@@ -2,7 +2,7 @@ setwd("/Users/julienhubar/Documents/#Master1/HDDA/High-dimensional-data-analysis
 #---------------------------------------------#
 #                 Library                     #
 #---------------------------------------------#
-
+install.packages("dplyr")
 library(ggplot2)
 library(dplyr)
 library(lubridate)
@@ -18,6 +18,10 @@ library(reshape2)
 library(car)
 library(rgl)
 library(gridExtra)
+
+library("tidyr")
+library("purrr")
+library("qgraph")
 #---------------------------------------------#
 #           Data pre-processing               #
 #---------------------------------------------#
