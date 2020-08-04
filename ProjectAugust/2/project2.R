@@ -268,19 +268,19 @@ library(Rtsne)
 library(MASS)
 library(rgl)
 # 3D
-tSNE = Rtsne(quantitative_data, dims = 3, perplexity = 10)
+tSNE = Rtsne(quanti_Data, dims = 3, perplexity = 10)
 plot3d(tSNE$Y[,1], tSNE$Y[,2], tSNE$Y[,3], col = data$rain + 3)
 
 # 2D with outliers highlight
 ## Twenty most outlying observations (robust mahanalobis distance, see robust_detection.R)
-h <- floor((dim(quantitative_data)[1] + dim(quantitative_data)[2] + 1)/2)
-robust <- cov.rob(quantitative_data, cor = TRUE, quantile.used = h, method = "mcd")
-robust_maha <- mahalanobis(quantitative_data, robust$center, robust$cov)
+h <- floor((dim(quanti_Data)[1] + dim(quanti_Data)[2] + 1)/2)
+robust <- cov.rob(quanti_Data, cor = TRUE, quantile.used = h, method = "mcd")
+robust_maha <- mahalanobis(quanti_Data, robust$center, robust$cov)
 sorted_maha <- sort(robust_maha, index.return = TRUE)
 ten_outlyings <- sorted_maha$ix[1:20]
 
 pdf("tSNE.pdf")
-tSNE = Rtsne(quantitative_data, perplexity=20)
+tSNE = Rtsne(quanti_Data, perplexity=20)
 plot(tSNE$Y, asp = 1, col = 8, xlab = "X1", ylab = "X2")
 points(tSNE$Y[ten_outlyings,], col = "red")
 grid()
