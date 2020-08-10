@@ -166,7 +166,7 @@ ggsave("histograms_robust_all.pdf", plt)
 # PART 3.2 : Further investigation of the correlation              #
 #       structure of the quantitative variables                    #
 #------------------------------------------------------------------#
-
+library("qgraph")
 ## 1. Robust correlation matrix
 h <- floor((dim(quanti_Data)[1] + dim(quanti_Data)[2] + 1) / 2)
 robust <- cov.rob(quanti_Data, cor = TRUE, quantile.used = h, method = "mcd")
@@ -182,7 +182,7 @@ dev.off()
 
 ### 2.a Classic covariance
 classic_cov <- cov(quanti_Data)
-qgraph::qgraph(solve(as.matrix(classic_cov)), fade = FALSE, edge.labels = TRUE, diag = FALSE, minimum = 1e-3, filetype = "pdf", filename = "qgraph_classic_cov")
+qgraph(solve(as.matrix(classic_cov)), fade = FALSE, edge.labels = TRUE, diag = FALSE, minimum = 1e-3, filetype = "pdf", filename = "qgraph_classic_cov")
 
 ### 2.b L1-regularized covariance
 
@@ -192,6 +192,7 @@ BIC <- rep(0, 10)
 
 n <- dim(quanti_Data)[1]
 p <- dim(quanti_Data)[2]
+library(huge)
 
 for (i in 1:length(lambda)) {
   l1reg <- huge(classic_cov, lambda[i], method = "glasso", cov.output = TRUE)
