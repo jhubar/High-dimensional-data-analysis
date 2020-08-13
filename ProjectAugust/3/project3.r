@@ -180,6 +180,7 @@ ggsave("boxplots_residuals.pdf", plt)
 #     CV with model_Updated              #
 #----------------------------------------#
 
+
 LOO_Posterior <- rep(0, dim(data_Updated)[1])
 for (i in 1:dim(data_Updated)[1]) {
   idx <- rep(TRUE, dim(data_Updated)[1])
@@ -190,20 +191,20 @@ for (i in 1:dim(data_Updated)[1]) {
 }
 
 # Construct confusion matrix
+threshold = 0.5
 Actual<- V50
-Predicted <- as.integer(LOO_Posterior > 0.5)
-#conf_mat <- table(Predicted,Actual)
-conf_mat <- table(Predicted,Actual)
-print(conf_mat)
+Predicted <- as.integer(LOO_Posterior > threshold)
+conf_Mat <- table(Predicted,Actual)
+conf_mat <- table(V50,Predicted)
 
-#  sensitivity and specificity
+# Compute sensitivity and specificity
 sens_or_spec <- function(confusion_matrix, spec = FALSE) {
   if (spec) {
-    specificity <-(confusion_matrix[2,2])/(confusion_matrix[2,2] + confusion_matrix[1,2])
+    specificity <- (confusion_matrix[1,1])/(confusion_matrix[1,1] + confusion_matrix[1,2])
     return(specificity)
   }
   else {
-    sensitivity <-(confusion_matrix[1,1])/(confusion_matrix[1,1] + confusion_matrix[2,1])
+    sensitivity <- (confusion_matrix[2,2])/(confusion_matrix[2,2] + confusion_matrix[2,1])
     return(sensitivity)
   }
 }
@@ -222,22 +223,35 @@ ROC_maker <- function(scores, memberships) {
     data <- as.data.frame(scores)
     data["Membership"] <- as.integer(data > cut)
     
-    confusion_matrix <- table( data[, "Membership"],memberships)
+    confusion_matrix <- table(memberships, data[, "Membership"])
     sensitivity[idx] <- sens_or_spec(confusion_matrix)
     specificity[idx] <- sens_or_spec(confusion_matrix, spec = TRUE)
     idx <- idx + 1
   }
-  sensitivity <- c(sensitivity, 1)
-  specificity <- c(specificity, 0)
+  sensitivity <- c(sensitivity, 0)
+  specificity <- c(specificity, 1)
   plot(1 - specificity, sensitivity, type="l")
   
   return(list(spec = (1 - specificity), sens = sensitivity))
 }
-
 pdf("ROC.pdf")
 ROC <- ROC_maker(LOO_Posterior, V50)
 abline(a = 0, b = 1, col = "red")
+abline( v = 1-specificity, col = "blue")
+abline( h= sensitivity , col = "blue")
 dev.off()
+# Compute AUC
+AUC <- function(ROCx, ROCy)
+{
+  n <- length(ROCx)
+  base <-ROCx[1:(n-1)] -ROCx[2:n] 
+  height <- ROCy[2:n]
+  return(sum(base*height))
+}
+auc <- AUC(ROCx = ROC$spec, ROCy = ROC$sens)
+print(auc)
+#dev.off()
+
 # Compute AUC
 AUC <- function(ROCx, ROCy)
 {
@@ -253,9 +267,7 @@ print(auc)
 #           Linear Discriminant Analysis              #
 #-----------------------------------------------------# 
 
-
-
-quanti_Data <- scale(quanti_Data) # scaled !
+quanti_Data <- scale(quanti_Data) 
 
 g <- 2
 n <- dim(data)[1]
@@ -267,7 +279,19 @@ lda_full <- lda(x=quanti_Data, grouping =V50 )
 #---------------------------------------------#
 
 print(lda_full$scaling)
+print(sort(lda_full$scaling))
+plot(lda_full)
 
+pdf("ldaSuppressing.pdf")
+plot(lda_full$scaling)
+abline(h = mean(lda_full$scaling), col = "black")
+abline(h = max(lda_full$scaling), col = "black")
+abline(h = min(lda_full$scaling), col = "black")
+abline(h = (mean(lda_full$scaling)+min(lda_full$scaling)/2), col = "blue")
+abline(h = (mean(lda_full$scaling)+max(lda_full$scaling)/2), col = "blue")
+abline(h = mean(lda_full$scaling)+0.2, col = "red")
+abline(h = mean(lda_full$scaling)-0.2, col = "red")
+dev.off()
 ## Scores
 scores <- as.matrix(quanti_Data) %*% cbind(lda_full$scaling)
 
@@ -297,19 +321,17 @@ for (i in 1:p) {
   l <- (g - 1) * lda_partial$svd[1]^2 / n
   gamma[i] <- l / (1 + l)
 }
-
+lda_partial
 cbind(quanti_var, gamma)
 
-quanti_var <- c('V24','V30','V32'
-                ,'V35','V36','V37','V38','V39','V41',
-                'V45')
-quanti_Data <- scale(data[, quanti_var]) # scaled !
-
+quanti_var <- c('V24','V30','V32','33','V36','V38','V39','V41','V45')
+quanti_Data <- data %>% dplyr::select("V24","V30","V32","V33","V36","V38","V39","V41","V45")
+quanti_Data <- scale(quanti_Data)
 lda_final <- lda(x=quanti_Data, grouping=V50)
 
 ## Canonical variable
 print(lda_final$scaling)
-
+plot(lda_final)
 ## Power
 l <- (g - 1) * lda_final$svd[1]^2 / n
 gamma <- l / (1 + l)
@@ -345,6 +367,9 @@ for (i in 1:n) {
   
   pred[i] <- abs(z - mu1) < abs(z - mu0)
 }
+lda$scaling
+
+
 
 ## Confusion matrix
 conf_mat <- table(V50, pred)
@@ -358,10 +383,15 @@ pdf("cov_group_false.pdf")
 corrplot(cov, is.corr=FALSE, method = "circle", type = "lower", tl.col = "black", tl.pos = "ld", tl.srt = 45)
 dev.off()
 
-cov <- cov(quantitative_data[V50 == 1,])
+cov <- cov(quanti_Data[V50 == 1,])
 pdf("cov_group_true.pdf")
 corrplot(cov, is.corr=FALSE, method = "circle", type = "lower", tl.col = "black", tl.pos = "ld", tl.srt = 45)
 dev.off()
 
 var(g0)
 var(g1) 
+mean(g0)
+mean(g1)
+pdf("lda.pdf")
+plot(lda_final)
+dev.off()
