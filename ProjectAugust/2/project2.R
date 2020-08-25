@@ -23,28 +23,9 @@ library("naniar")
 library("MNM")
 library("matlib")
 library("ggpubr")
-install.packages("rgl")
-install.packages("psych")
-library(ggplot2)
-library(dplyr)
-library(reshape2)
-library(corrplot)
-library(reshape2)
-library(corrplot)
-library(MASS)
-library(huge)
-install.packages("qgraph")
-install.packages("corrplot")
 
-remove.packages("qgraph")
-remove.packages("ggplot2")
-remove.packages("dplyr")
-remove.packages("reshape2")
-remove.packages("corrplot")
-remove.packages("reshape2")
-remove.packages("corrplot")
-remove.packages("MASS")
-remove.packages("huge")
+
+
 #---------------------------------------------#
 #           Data pre-processing               #
 #---------------------------------------------#
@@ -55,12 +36,12 @@ attach(data)
 #---------------------------------------------#
 #     Strategy to treat missing data          #
 #---------------------------------------------#
-data <- data%>% select ("V1","V2","V3","V4","V6","V7","V8","V11","V12","V13",
+data <- data%>% dplyr::select ("V1","V2","V3","V4","V6","V7","V8","V11","V12","V13",
                         "V14","V15","V16","V17","V19","V20","V21","V22","V23","V27"
                         ,"V28","V29","V50","V24","V30","V31","V32","V33","V34",
                         "V35","V36","V37","V38","V39","V40","V41","V42","V43","V44","V45")
 
-quali_Data <- data %>% select("V1","V2","V3","V4","V6",
+quali_Data <- data %>% dplyr::select("V1","V2","V3","V4","V6",
                               "V7","V8","V11","V12","V13",
                               "V14","V15","V16","V17","V19"
                               ,"V20","V21","V22","V23","V27"
@@ -69,9 +50,17 @@ for(i in 1:ncol(data)){
   data[is.na(data[,i]), i] <- mean(data[,i], na.rm = TRUE)
 }
 
+dataM <- data[V1=='1',]
+quantDataM <- dataM %>% dplyr::select("V24","V30","V31","V32","V33",
+                                      "V34","V35","V36","V37","V38","V39","V40","V41","V42","V43","V44",
+                                      "V45")
 
+dataF <- data[V1=='0',]
+quantDataF <- dataF %>% dplyr::select("V24","V30","V31","V32","V33",
+                                      "V34","V35","V36","V37","V38","V39","V40","V41","V42","V43","V44",
+                                      "V45")
 
-quanti_Data <- data %>% select("V24","V30","V31","V32","V33",
+quanti_Data <- data %>% dplyr::select("V24","V30","V31","V32","V33",
                                "V34","V35","V36","V37","V38","V39","V40","V41","V42","V43","V44",
                                "V45")
 
@@ -81,35 +70,85 @@ quanti_Data <- data %>% select("V24","V30","V31","V32","V33",
 #---------------------------------------------#
 
 
-# Use MCD estimator (Coverage parameter of 0.75)
+# Use MCD estimator
 
-h <- floor((dim(quanti_Data)[1] + dim(quanti_Data)[2] + 1)/2)
+h <- floor( ((dim(quanti_Data)[1] + dim(quanti_Data)[2] + 1)/2))
+hM<- floor( ((dim(quantDataM)[1] + dim(quantDataM)[2] + 1)/2))
+hF<- floor( ((dim(quantDataF)[1] + dim(quantDataF)[2] + 1)/2))
 set.seed(0)
+
 robust <- cov.rob(quanti_Data, cor = TRUE, quantile.used = h, method = "mcd")
+robustM <- cov.rob(quantDataM, cor = TRUE, quantile.used = hM, method = "mcd")
+robustF <- cov.rob(quantDataF, cor = TRUE, quantile.used = hF, method = "mcd")
 
 # Retrieve robust means and covariance matrix
 robust_mean <- robust$center
 robust_cov <- robust$cov
 
+robust_meanM <- robustM$center
+robust_covM <- robustM$cov
+
+robust_meanF <- robustF$center
+robust_covF <- robustF$cov
+
 ## Compute robust Mahalanobis distances
 robust_maha <- mahalanobis(quanti_Data, robust_mean, robust_cov)
 robust_maha <- data.frame(robust_maha)
+
+robust_mahaM <- mahalanobis(quantDataM, robust_meanM, robust_covM)
+robust_mahaM <- data.frame(robust_mahaM)
+
+robust_mahaF <- mahalanobis(quantDataF, robust_meanF, robust_covF)
+robust_mahaF <- data.frame(robust_maha)
 
 ## Compute sample average and sample covariance
 sample_mean <- colMeans(quanti_Data)
 sample_cov <- cov(quanti_Data)
 
+sample_meanM <- colMeans(quantDataM)
+sample_covM <- cov(quantDataM)
+
+sample_meanF <- colMeans(quantDataF)
+sample_covF <- cov(quantDataF)
+
 ## Compute classic Mahalanobis distances
 classic_maha <- mahalanobis(quanti_Data, sample_mean, sample_cov)
 classic_maha <- data.frame(classic_maha)
 
+classic_mahaM <- mahalanobis(quantDataM, sample_meanM, sample_covM)
+classic_mahaM <- data.frame(classic_mahaM)
+
+classic_mahaF <- mahalanobis(quantDataF, sample_meanF, sample_covF)
+classic_mahaF <- data.frame(classic_mahaF)
+
 ## Compare both distances through a DD-plot
-distances <- data.frame(c(classic_maha, robust_maha))
-plt <- ggplot(distances, aes(x = distances[, 1], y = distances[, 2]))
-plt <- plt + geom_point() + geom_vline(xintercept = qchisq(0.95, dim(quanti_Data)[2]), col = "red")
-plt <- plt + geom_hline(yintercept = qchisq(0.95, dim(quanti_Data)[2]), col = "red")
-plt <- plt + labs(x = "Classic Mahalanobis distances", y = "Robust Mahalanobis distances")
-ggsave(filename = "compare_maha_most_robust.pdf")
+png("DD-Plot.png")
+cmaha <-mahalanobis(quanti_Data, sample_mean, sample_cov)
+rmaha <-mahalanobis(quanti_Data, robust_mean, robust_cov)
+plot(cmaha,rmaha, col=V50+1,
+     xlab="Squared classic Mahalanobis distance", ylab='Squared robust Mahalanobis distance', main="DD-plot")
+abline(v=qchisq(0.95,dim(quanti_Data)[2]), col="blue") ; abline(h=qchisq(0.95,dim(quanti_Data)[2]), col="blue") ; legend("topleft",c("Die","Live"), col=1:2, pch=16)
+dev.off()
+
+pdf("DD-Plot_M_F.pdf")
+par(mfrow=c(1,2))
+cmahaM <-mahalanobis(quantDataM, sample_meanM, sample_covM)
+rmahaM <-mahalanobis(quantDataM, robust_meanM, robust_covM)
+plot(cmahaM,rmahaM, col=V50+1,
+     xlab="Squared classic Mahalanobis distance", ylab='Squared robust Mahalanobis distance', main="DD-plot-Male")
+abline(v=qchisq(0.95,dim(quantDataM)[2]), col="blue")
+abline(h=qchisq(0.95,dim(quantDataM)[2]), col="blue") 
+legend("topleft",c("Die","Live"), col=1:2, pch=16)
+
+cmahaF <-mahalanobis(quantDataF, sample_meanF, sample_covF)
+rmahaF <-mahalanobis(quantDataF, robust_meanF, robust_covF)
+plot(cmahaF,rmahaF, col=V50+1,
+     xlab="Squared classic Mahalanobis distance", ylab='Squared robust Mahalanobis distance', main="DD-plot-Female")
+abline(v=qchisq(0.95,dim(quantDataF)[2]), col="blue") 
+abline(h=qchisq(0.95,dim(quantDataF)[2]), col="blue")  
+legend("topleft",c("Die","Live"), col=1:2, pch=16)
+dev.off()
+
 
 ## Compute outlying rates for both methods
 rob_outliers_rate <- sum(robust_maha > qchisq(.95, dim(quanti_Data)[2]))/dim(data)[1]
@@ -130,36 +169,14 @@ only_robust_outliers <- anti_join(outlying_obs_rob, outlying_obs_classic)
 boxplot_data <- quanti_Data
 boxplot_data["rob_outlying"] = FALSE
 boxplot_data[outlying_rob_idx, "rob_outlying"] = TRUE
-
+library(reshape2)
 melted <- melt(boxplot_data)
 plt <- ggplot(melted, aes(x = rob_outlying, y = value)) + geom_boxplot()
 plt <- plt + facet_wrap( ~ variable, scales = "free") + labs(x = "", y = "")
+plt
 ggsave("boxplots_outliers.pdf", plt)
 
-## Plot histograms of quantitative data (non outlying)
-melted <- melt(non_outlying)
-plt <- ggplot(melted, aes(x = value)) + geom_histogram()
-plt <- plt + facet_wrap( ~ variable, scales = "free") + labs(x = "", y = "")
-ggsave("histograms_non_outlying.pdf", plt)
 
-
-## Plot histograms of common outlying observations
-melted <- melt(common_outliers)
-plt <- ggplot(melted, aes(x = value)) + geom_histogram()
-plt <- plt + facet_wrap( ~ variable, scales = "free") + labs(x = "", y = "")
-ggsave("histograms_common_outliers.pdf", plt)
-
-## Plot histograms of robust outlying observations not detected by the classical approach
-melted <- melt(only_robust_outliers)
-plt <- ggplot(melted, aes(x = value)) + geom_histogram()
-plt <- plt + facet_wrap( ~ variable, scales = "free") + labs(x = "", y = "")
-ggsave("histograms_robust_only.pdf", plt)
-
-## Plot histograms of all robust outlying observations
-melted <- melt(outlying_obs_rob)
-plt <- ggplot(melted, aes(x = value)) + geom_histogram()
-plt <- plt + facet_wrap( ~ variable, scales = "free") + labs(x = "", y = "")
-ggsave("histograms_robust_all.pdf", plt)
 
 
 #------------------------------------------------------------------#
@@ -170,8 +187,12 @@ library("qgraph")
 ## 1. Robust correlation matrix
 h <- floor((dim(quanti_Data)[1] + dim(quanti_Data)[2] + 1) / 2)
 robust <- cov.rob(quanti_Data, cor = TRUE, quantile.used = h, method = "mcd")
+robustM <- cov.rob(quantDataM, cor = TRUE, quantile.used = hM, method = "mcd")
+robustF <- cov.rob(quantDataF, cor = TRUE, quantile.used = hF, method = "mcd")
 
 classic_cor <- cor(quanti_Data)
+classic_corM <- cor(quantDataM)
+classic_corF <- cor(quantDataF)
 pdf("classic_correlation.pdf")
 corrplot(classic_cor, method = "circle", type = "lower", tl.col = "black", tl.pos = "ld", tl.srt = 45)
 dev.off()
@@ -180,110 +201,90 @@ pdf("robust_correlation.pdf")
 corrplot(robust$cor, method = "circle", type = "lower", tl.col = "black", tl.pos = "ld", tl.srt = 45)
 dev.off()
 
+png("correlation_male_class.png")
+par(mfrow=c(1,2))
+corrplot(classic_corM, method = "circle", type = "lower", tl.col = "black", tl.pos = "ld", tl.srt = 45)
+corrplot(robustM$cor, method = "circle", type = "lower", tl.col = "black", tl.pos = "ld", tl.srt = 45)
+dev.off()
+png("correlation_female.png")
+par(mfrow=c(1,2))
+corrplot(classic_corF, method = "circle", type = "lower", tl.col = "black", tl.pos = "ld", tl.srt = 45)
+corrplot(robustF$cor, method = "circle", type = "lower", tl.col = "black", tl.pos = "ld", tl.srt = 45)
+dev.off()
+
 ### 2.a Classic covariance
 classic_cov <- cov(quanti_Data)
-qgraph(solve(as.matrix(classic_cov)), fade = FALSE, edge.labels = TRUE, diag = FALSE, minimum = 1e-3, filetype = "pdf", filename = "qgraph_classic_cov")
-
-### 2.b L1-regularized covariance
-
-#### Optimal lambda using BIC method
-lambda <- seq(0, 1, length.out = 10)
-BIC <- rep(0, 10)
-
-n <- dim(quanti_Data)[1]
-p <- dim(quanti_Data)[2]
-library(huge)
-
-for (i in 1:length(lambda)) {
-  l1reg <- huge(classic_cov, lambda[i], method = "glasso", cov.output = TRUE)
-  l1prec <- l1reg$icov[[1]]
-  BIC[i] <- -n * l1reg$loglik +
-    log(n) * (p + sum(l1prec[upper.tri(l1prec, diag = TRUE)] != 0))
-}
-
-plt <- ggplot() + geom_line(aes(x = lambda, y = BIC))
-ggsave(filename = "optimal_lambda.pdf", plt)
-
-lambda <- lambda[which.min(BIC)]
-
-#### L1-regularization with optimal lambda
-l1reg <- huge(classic_cov, lambda, method = "glasso", cov.output = TRUE)
-l1_cov <- l1reg$cov[[1]]
-
-rownames(l1_cov) <- rownames(classic_cov)
-colnames(l1_cov) <- colnames(classic_cov)
-
-qgraph::qgraph(solve(as.matrix(l1_cov)), fade = FALSE, edge.labels = TRUE, diag = FALSE, minimum = 1e-3, filetype = "pdf", filename = "qgraph_l1_cov")
+qgraph(solve(as.matrix(classic_cov)), fade = FALSE, edge.labels = TRUE, diag = FALSE, minimum = 1e-3)
 
 
-## Perform PCA 
-##  - on the correlation matrix (units and scales are too different)
-##  - using the non-robust estimation has been chosen, as no big differences can be osberved
-##    and as robust estimations eliminates outliers, what thus explains less the data.
+pdf("qgraph_Lambda0.pdf")
+qgraph(glasso(cov(quanti_Data), 0)$wi,edge.labels = T, directed = F, fade = F, diag = F, minimum = 1e-3)
+dev.off()
+pdf("qgraph.pdf")
+par(mfrow=c(3,2))
+qgraph(solve(as.matrix(classic_cov)), fade = FALSE, edge.labels = TRUE, diag = FALSE, minimum = 1e-3)
+qgraph(glasso(cov(quanti_Data), 0)$wi, bidirectional = T, directed = F, fade = FALSE, diag = F, minimum = 1e-3)
+qgraph(glasso(cov(quanti_Data), 0.005)$wi, bidirectional = T, directed = F, fade = FALSE, diag = F, minimum = 1e-3)
+qgraph(glasso(cov(quanti_Data), 0.05)$wi, bidirectional = T, directed = F, fade = FALSE, diag = F, minimum = 1e-3)
+qgraph(glasso(cov(quanti_Data), 0.5)$wi, bidirectional = T, directed = F, fade = FALSE, diag = F, minimum = 1e-3)
+qgraph(glasso(cov(quanti_Data), 1)$wi, bidirectional = T, directed = F, fade = FALSE, diag = F, minimum = 1e-3)
+dev.off()
 
-# The correlation matrix of the data can be connected with the result of the PCA
-corr <- cor(quanti_Data)
-corrplot(corr, method = "circle", type = "lower", tl.col = "black", tl.pos = "ld", tl.srt = 45)
 
-# P.C. and their corresponding percentage of total variance (scree plot)
+
+
+
 res_PCA <- princomp(quanti_Data, cor = TRUE)
-pc_var <- res_PCA$sdev ** 2 # exactly the same as eigen(corr)$values
-pdf("pca_scree_plot.pdf")
-plot(pc_var/sum(pc_var), type="b", ylab = "Percentage of variance", xlab = "Principal component index")
-grid()
+res_PCAM <- princomp(quantDataM, cor = TRUE)
+res_PCAF <- princomp(quantDataF, cor = TRUE)
+
+
+# PCA circle
+
+pdf("pcaCircleM.pdf")
+fviz_pca_var(res_PCAM,
+             col.var = "contrib", 
+             gradient.cols = c("#00AFBB", "#E7B800", "#FC4E07"),
+             repel = TRUE     
+)
+dev.off()
+pdf("pcaCircleF.pdf")
+fviz_pca_var(res_PCAF,
+             col.var = "contrib", 
+             gradient.cols = c("#00AFBB", "#E7B800", "#FC4E07"),
+             repel = TRUE     
+)
 dev.off()
 
-# Explainability of the first two P.C.
-variance_explained_2d <- (pc_var[1] + pc_var[2])/sum(pc_var)
-print(paste("The first two principal components explain", round(variance_explained_2d*100, digits=2), "% of the variance"))
-
-# Loadings of the first two P.C.
-loadings <- res_PCA$loadings
-pdf("pca_loadings.pdf")
-par(mfrow=c(2,1))
-for (i in 1:2) {
-  barplot(loadings[,i], main=paste("PC", i))
-}
-par(mfrow=c(1,1))
-dev.off()
-
-# Correlation between PCA variables and classic variables
-pdf("pca_variables_correlation.pdf")
-rescore <- cor(quanti_Data, res_PCA$scores)
-corrplot(rescore, method = "circle", tl.col = "black", tl.srt = 45)
-dev.off()
-
-# Percentage of variability of each variable in each P.C.
-pdf("pca_explained_variability.pdf")
-corrplot(rescore ** 2, method = "circle", tl.col = "black", tl.srt = 45)
-dev.off()
-
-# Correlation Circle
-pdf("pca_correlation_circle.pdf")
-s.corcircle(rescore[,1:2])
-dev.off()
+summary(res_PCAM)
+summary(res_PCAF)
 
 
+
+##################################################
 # ---------- PART 3.3.2 : tSNE Analysis ----------
+##################################################
+
+
+# 1. 2D-projection
 library(Rtsne)
-library(MASS)
-library(rgl)
-# 3D
-tSNE = Rtsne(quanti_Data, dims = 3, perplexity = 10)
-plot3d(tSNE$Y[,1], tSNE$Y[,2], tSNE$Y[,3], col = data$rain + 3)
+set.seed(1411)
+restSNE2 <- Rtsne(X=quanti_Data, perplexity=2)
+restSNE5 <- Rtsne(X=quanti_Data, perplexity=5)
+restSNE10 <- Rtsne(X=quanti_Data, perplexity=10)
+restSNE20 <- Rtsne(X=quanti_Data, perplexity=20)
+restSNE30 <- Rtsne(X=quanti_Data, perplexity=30)
+restSNE50 <- Rtsne(X=quanti_Data, perplexity=50)
+restSNE65 <- Rtsne(X=quanti_Data, perplexity=65)
 
-# 2D with outliers highlight
-## Twenty most outlying observations (robust mahanalobis distance, see robust_detection.R)
-h <- floor((dim(quanti_Data)[1] + dim(quanti_Data)[2] + 1)/2)
-robust <- cov.rob(quanti_Data, cor = TRUE, quantile.used = h, method = "mcd")
-robust_maha <- mahalanobis(quanti_Data, robust$center, robust$cov)
-sorted_maha <- sort(robust_maha, index.return = TRUE)
-ten_outlyings <- sorted_maha$ix[1:20]
-
-pdf("tSNE.pdf")
-tSNE = Rtsne(quanti_Data, perplexity=20)
-plot(tSNE$Y, asp = 1, col = 8, xlab = "X1", ylab = "X2")
-points(tSNE$Y[ten_outlyings,], col = "red")
-grid()
+pdf("tsne.pdf")
+par(mfrow=c(2,3))
+plot(restSNE2$Y, col=V50+1, xlab="tSNE1", ylab="tSNE2", main="Perplexity=2")
+plot(restSNE5$Y, col=V50+1, xlab="tSNE1", ylab="tSNE2", main="Perplexity=5")
+plot(restSNE10$Y, col=V50+1, xlab="tSNE1", ylab="tSNE2", main="Perplexity=10")
+plot(restSNE20$Y, col=V50+1, xlab="tSNE1", ylab="tSNE2", main="Perplexity=20")
+plot(restSNE30$Y, col=V50+1, xlab="tSNE1", ylab="tSNE2", main="Perplexity=30")
+plot(restSNE50$Y, col=V50+1, xlab="tSNE1", ylab="tSNE2", main="Perplexity=50")
 dev.off()
+
 

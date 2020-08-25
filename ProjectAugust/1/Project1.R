@@ -193,6 +193,15 @@ attach(data)
 #---------------------------------------------#
 #      Part 3: Explanatory analysis           #
 #---------------------------------------------#
+dataM <- data[V1=='1',]
+quantDataM <- dataM %>% dplyr::select("V24","V30","V31","V32","V33",
+                                      "V34","V35","V36","V37","V38","V39","V40","V41","V42","V43","V44",
+                                      "V45")
+
+dataF <- data[V1=='0',]
+quantDataF <- dataF %>% dplyr::select("V24","V30","V31","V32","V33",
+                                      "V34","V35","V36","V37","V38","V39","V40","V41","V42","V43","V44",
+                                      "V45")
 quali_Data <- data %>% select("V1","V2","V3","V4","V6","V7","V8","V11","V12",
                               "V13","V14","V15","V16","V17","V19","V20","V21","V22","V23",
                               "V27","V28","V29","V50")
@@ -236,6 +245,30 @@ dev.off()
 corr_quanti <- cor(quanti_Data)
 pdf("correlation_quanti.pdf")
 corrplot(corr_quanti, method = "circle", type = "lower", tl.col = "black", tl.pos = "ld", tl.srt = 45)
+dev.off()
+
+library("qgraph")
+## 1. Robust correlation matrix
+h <- floor((dim(quanti_Data)[1] + dim(quanti_Data)[2] + 1) / 2)
+robust <- cov.rob(quanti_Data, cor = TRUE, quantile.used = h, method = "mcd")
+robustM <- cov.rob(quantDataM, cor = TRUE, quantile.used = hM, method = "mcd")
+robustF <- cov.rob(quantDataF, cor = TRUE, quantile.used = hF, method = "mcd")
+
+classic_cor <- cor(quanti_Data)
+classic_corM <- cor(quantDataM)
+classic_corF <- cor(quantDataF)
+pdf("classic_correlation.pdf")
+corrplot(classic_cor, method = "circle", type = "lower", tl.col = "black", tl.pos = "ld", tl.srt = 45)
+dev.off()
+
+
+png("correlation_male_class.png")
+par(mfrow=c(1,2))
+corrplot(classic_corM, method = "circle", type = "lower", tl.col = "black", tl.pos = "ld", tl.srt = 45)
+dev.off()
+png("correlation_female.png")
+par(mfrow=c(1,2))
+corrplot(classic_corF, method = "circle", type = "lower", tl.col = "black", tl.pos = "ld", tl.srt = 45)
 dev.off()
 
 specie <- c(rep("V1" , 2) , rep("V2" , 2) , rep("V3" , 2) , rep("V4" , 2),
