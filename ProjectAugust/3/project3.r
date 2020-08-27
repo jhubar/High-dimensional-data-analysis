@@ -47,18 +47,14 @@ for(i in 1:ncol(data)){
 }
 
 
-dataM <- data[V1=='1',]
-quantDataM <- dataM %>% dplyr::select("V24","V30","V31","V32","V33",
-                                      "V34","V35","V36","V37","V38","V39","V40","V41","V42","V43","V44",
-                                      "V45")
+#dataM <- data[V1=='1',]
+#quantDataM <- dataM %>% dplyr::select("V24","V30","V31","V32","V33","V34","V35","V36","V37","V38","V39","V40","V41","V42","V43","V44","V45")
 
 quantData <- data %>% dplyr::select("V24","V30","V31","V32","V33",
                                "V34","V35","V36","V37","V38","V39","V40","V41","V42","V43","V44",
                                "V45")
 
-quanti_var <- c('V24','V30','V31','V32','V33',
-                'V34','V35','V36','V37','V38','V39','V40','V41','V42','V43','V44',
-                'V45')
+
 
 #---------------------------------------------#
 #         Logistic Regression Model           #
@@ -68,7 +64,6 @@ quanti_var <- c('V24','V30','V31','V32','V33',
 #       Search a good logistic model          #
 #---------------------------------------------#
 
-explanatory_var <- quanti_var
 
 #---------------------------------------------#
 #               Complete model                #
@@ -77,47 +72,49 @@ test <- glm(data$V50~., family = binomial(link = "logit"), data = data)
 summary(test)
 stepAIC(test)
 
-glm1 <- glm(V50 ~ V24+V30+V31+V32+V33+V34+V35+V36+V37+V38+V39+V40+V41+V42+V43+V44+V45, family = binomial(link = "logit"),data = quantData)
-
-summary(glm1)
-plot(glm1$linear.predictors,fit1$fitted ,col = colors.th)
-
-#---------------------------------------------#
-#       Draw correlation plot of the          #
-#            explanatory variables            #
-#---------------------------------------------#
-
-corrplot_of_explanatory_variables <- cor(data[, explanatory_var])
-pdf("correlation_plot_of_explanatory_variables.pdf")
-corrplot(corrplot_of_explanatory_variables, method = "circle", type = "lower", tl.col = "black", tl.pos = "ld", tl.srt = 45)
-dev.off()
 #---------------------------------------------#
 #       Compute VIF scores to check           #
 #          for multicolinearity               #
 #---------------------------------------------#
 
-VIF_scores <- vif(glm1)
+VIF_scores <- vif(test)
 print(VIF_scores)
 print(sort(VIF_scores))
 pdf("vif_scores.pdf")
 grPal <- colorRampPalette(c('green','orange','red'))
 Col <- grPal(3)[as.numeric(cut(VIF_scores,breaks = 3))]
 plot(VIF_scores,pch = 20,col=Col)
-abline(h=mean(c(3.791036,2.966739)), col= "red")
-abline(h=mean(c(2.165801,1.702041)), col= "orange")
 dev.off()
 
+
+
 #---------------------------------------------#
-#       Compute glmV38,39,40,41               #
+#       Draw correlation plot of the          #
+#            explanatory variables            #
 #---------------------------------------------#
-glmV38 <- glm(V50 ~ V24+V30+V31+V32+V33+V34+V35+V36+V37+V38+V42+V43+V44+V45, family = binomial(link = "logit"))
+
+corrplot_of_explanatory_variables <- cor(data[,])
+pdf("correlation_plot_of_explanatory_variables.pdf")
+corrplot(corrplot_of_explanatory_variables, method = "circle", type = "lower", tl.col = "black", tl.pos = "ld", tl.srt = 45)
+dev.off()
+
+attach(data)
+#---------------------------------------------#
+#       Compute glmV38,39,V20                 #
+#---------------------------------------------#
+
+glmV20 <- glm(data$V50 ~ V1+V2+V3+V4+V6+V7+V8+V11+V12V+13+V14+V15+V16+V17+V19+V20+V21+V22+V23+V27+V28+V29+V24+V30+V31+V32+V33+V34+V35+V36+V37+V40+V41+V42+V43+V44+V45,
+              family = binomial(link = "logit"),data = data)
+summary(glmV20)
+glmV38 <- glm(V50 ~ V1+V2+V3+V4+V6+V7+V8+V11+V12V+13+V14+V15+V16+V17+V19+V21+V22+V23+V27+V28+V29+
+                V24+V30+V31+V32+V33+V34+V35+V36+V37+V38+V40+V41+V42+V43+V44+V45, family = binomial(link = "logit"), data = data)
 summary(glmV38)
-glmV39 <- glm(V50 ~ V24+V30+V31+V32+V33+V34+V35+V36+V37+V39+V42+V43+V44+V45, family = binomial(link = "logit"))
+dataV38 <- data%>% dplyr::select(data,-starts_with("V20","V39"))
+glmV39 <- glm(V50 ~ V1+V2+V3+V4+V6+V7+V8+V11+V12V+13+V14+V15+V16+V17+V19+V21+V22+V23+V27+V28+V29+
+                V24+V30+V31+V32+V33+V34+V35+V36+V37+V38+V39+V40+V41+V42+V43+V44+V45, family = binomial(link = "logit"))
 summary(glmV39)
-glmV40 <- glm(V50 ~ V24+V30+V31+V32+V33+V34+V35+V36+V37+V40+V42+V43+V44+V45, family = binomial(link = "logit"))
-summary(glmV40)
-glmV41 <- glm(V50 ~ V24+V30+V31+V32+V33+V34+V35+V36+V37+V41+V42+V43+V44+V45, family = binomial(link = "logit"))
-summary(glmV41)
+
+summary(test)
 #---------------------------------------------#
 #       PCA(V38,39,40,41) -> model            #
 #---------------------------------------------#
@@ -133,10 +130,15 @@ fviz_pca_var(res.pca,
 explanatory_var_updated <- c('V24','V30','V31','V32','V33','V34','V35','V36','V37','V42','V43','V44','V45', 'PC1')
 data_Updated <- data[c('V24','V30','V31','V32','V33','V34','V35','V36','V37','V42','V43','V44','V45','V50')]
 data_Updated['PC1'] <- pca$scores[, 1]
-attach(data_Updated)
 
+attach(data_Updated)
+for(i in 1:ncol(data_Updated)){
+  data_Updated[is.na(data_Updated[,i]), i] <- mean(data_Updated[,i], na.rm = TRUE)
+}
 glm2 <- glm(V50 ~ V24+V30+V31+V32+V33+V34+V35+V36+V37+V42+V43+V44+V45+PC1, family = binomial(link = "logit"))
 summary(glm2)
+
+
 
 # Conduct variable selection using backward selection.
 stepAIC(glm2)
