@@ -2,7 +2,7 @@ setwd("/Users/julienhubar/Documents/#Master1/HDDA/High-dimensional-data-analysis
 #---------------------------------------------#
 #                 Library                     #
 #---------------------------------------------#
-install.packages("dplyr")
+
 library(ggplot2)
 library(dplyr)
 library(lubridate)
@@ -18,10 +18,10 @@ library(reshape2)
 library(car)
 library(rgl)
 library(gridExtra)
+library(tidyr)
+library(purrr)
+library(qgraph)
 
-library("tidyr")
-library("purrr")
-library("qgraph")
 #---------------------------------------------#
 #           Data pre-processing               #
 #---------------------------------------------#
@@ -31,7 +31,7 @@ attach(data)
 
 quali_Data <- data %>% select("V1","V2","V3","V4","V5","V6","V7","V8","V9","V10","V11","V12",
                               "V13","V14","V15","V16","V17","V18","V19","V20","V21","V22","V23","V27","V28","V29","V50")
-quanti_Data <- data %>% select("V24","V25","V26","V30","V31","V32","V33","V34","V35","V36","V37","V38","V39"
+quantData <- data %>% select("V24","V25","V26","V30","V31","V32","V33","V34","V35","V36","V37","V38","V39"
                                ,"V40","V41","V42","V43","V44","V45","V46","V47","V48","V49")
 
 
@@ -125,7 +125,7 @@ dev.off()
 
 # Missingness visualisation quanti
 ggsave("MissingnessVisualisation_Quanti.png")
-vis_miss(quanti_Data, sort_miss = TRUE)
+vis_miss(quantData, sort_miss = TRUE)
 dev.off()
 
 # Deletion of columns with more than 20% missing data
@@ -140,7 +140,7 @@ quali_Data <- data %>% select("V1","V2","V3","V4","V6","V7","V8","V11","V12",
                               "V13","V14","V15","V16","V17","V19","V20","V21","V22","V23",
                               "V27","V28","V29","V50")
 
-quanti_Data <- data %>% select("V24","V30","V31","V32","V33",
+quantData <- data %>% select("V24","V30","V31","V32","V33",
                                "V34","V35","V36","V37","V38","V39","V40","V41","V42","V43","V44",
                                "V45")
 
@@ -153,7 +153,7 @@ dev.off()
 
 # Missingness visualisation quanti after deletion
 pdf("MissingnessVisualisation_Quanti_after_deletion.pdf")
-vis_miss(quanti_Data, sort_miss = TRUE)
+vis_miss(quantData, sort_miss = TRUE)
 dev.off()
 
 ## Missingness 
@@ -165,11 +165,11 @@ dev.off()
 
 # Missingness rate for each columns
 pdf("missingness_rates.pdf")
-nb_na <- colSums(is.na(data[, columns_miss]))
-barplot(nb_na / nrow(data), legend.text = nb_na, col = rainbow_hcl(length(columns_miss)))
+nNA <- colSums(is.na(data[, columns_miss]))
+barplot(nNA / nrow(data), legend.text = nNA, col = rainbow_hcl(length(columns_miss)))
 dev.off()
 
-## Z(i, j) = z-score of mean(i | is.na(j)) as an estimator of mean(i)
+
 Z <- matrix(NA, length(columns), length(columns_miss))
 rownames(Z) <- columns
 colnames(Z) <- columns_miss
@@ -206,7 +206,7 @@ quali_Data <- data %>% select("V1","V2","V3","V4","V6","V7","V8","V11","V12",
                               "V13","V14","V15","V16","V17","V19","V20","V21","V22","V23",
                               "V27","V28","V29","V50")
 
-quanti_Data <- data %>% select("V24","V30","V31","V32","V33",
+quantData <- data %>% select("V24","V30","V31","V32","V33",
                                "V34","V35","V36","V37","V38","V39","V40","V41","V42","V43","V44",
                                "V45")
 
@@ -214,7 +214,7 @@ quanti_Data <- data %>% select("V24","V30","V31","V32","V33",
 #  Part 3.1: Univariate exploratory analysis  #
 #---------------------------------------------#
 
-melted <- melt(quanti_Data)
+melted <- melt(quantData)
 plt <- ggplot(melted, aes(x = value)) + geom_histogram()
 plt <- plt + facet_wrap( ~ variable, scales = "free") + labs(x = "", y = "")
 ggsave("histograms_quanti.pdf", plt)
@@ -242,19 +242,15 @@ corrplot(corr_quali, method = "circle", type = "lower", tl.col = "black", tl.pos
 dev.off()
 
 # correlation btw quali varibles
-corr_quanti <- cor(quanti_Data)
+corr_quanti <- cor(quantData)
 pdf("correlation_quanti.pdf")
 corrplot(corr_quanti, method = "circle", type = "lower", tl.col = "black", tl.pos = "ld", tl.srt = 45)
 dev.off()
 
-library("qgraph")
-## 1. Robust correlation matrix
-h <- floor((dim(quanti_Data)[1] + dim(quanti_Data)[2] + 1) / 2)
-robust <- cov.rob(quanti_Data, cor = TRUE, quantile.used = h, method = "mcd")
-robustM <- cov.rob(quantDataM, cor = TRUE, quantile.used = hM, method = "mcd")
-robustF <- cov.rob(quantDataF, cor = TRUE, quantile.used = hF, method = "mcd")
 
-classic_cor <- cor(quanti_Data)
+
+
+classic_cor <- cor(quantData)
 classic_corM <- cor(quantDataM)
 classic_corF <- cor(quantDataF)
 pdf("classic_correlation.pdf")
@@ -263,11 +259,9 @@ dev.off()
 
 
 png("correlation_male_class.png")
-par(mfrow=c(1,2))
 corrplot(classic_corM, method = "circle", type = "lower", tl.col = "black", tl.pos = "ld", tl.srt = 45)
 dev.off()
 png("correlation_female.png")
-par(mfrow=c(1,2))
 corrplot(classic_corF, method = "circle", type = "lower", tl.col = "black", tl.pos = "ld", tl.srt = 45)
 dev.off()
 
@@ -318,7 +312,7 @@ quanti_cols <- c("V24","V30","V31","V32","V33",
                  "V34","V35","V36","V37","V38","V39","V40","V41","V42","V43","V44",
                  "V45")
 
-# /!\ IL est interressant de voir que la plupart des patients atteint d'une ciroses meurt du HCC
+
 
 pdf("tableV1V3.pdf", width=1, height=1)
 df <- table(V1,V3)
@@ -521,9 +515,9 @@ quanti_cols <- c("V24","V30","V31","V32","V33","V34","V35","V36","V37","V38","V3
 
 
 # Mahalanobis distance
-mean_vec <- colMeans(quanti_Data)
-cova <- cov(quanti_Data)
-maha <- mahalanobis(quanti_Data, mean_vec, cova)
+mean_vec <- colMeans(quantData)
+cova <- cov(quantData)
+maha <- mahalanobis(quantData, mean_vec, cova)
 
 temp <- as.data.frame(matrix(maha, ncol = 1))
 temp$index = as.numeric(rownames(temp))

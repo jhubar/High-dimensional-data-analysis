@@ -35,26 +35,23 @@ attach(data)
 #     Strategy to treat missing data          #
 #---------------------------------------------#
 data <- data%>% dplyr::select ("V1","V2","V3","V4","V6","V7","V8","V11","V12",
-                        "V13","V14","V15","V16","V17","V19","V20","V21","V22","V23",
-                        "V27","V28","V29","V50","V24","V30","V31","V32","V33",
-                        "V34","V35","V36","V37","V38","V39","V40","V41","V42","V43","V44",
-                        "V45")
+                               "V13","V14","V15","V16","V17","V19","V20","V21","V22","V23",
+                               "V27","V28","V29","V50","V24","V30","V31","V32","V33",
+                               "V34","V35","V36","V37","V38","V39","V40","V41","V42","V43","V44",
+                               "V45")
 quali_Data <- data %>% dplyr::select("V1","V2","V3","V4","V6","V7","V8","V11","V12",
-                              "V13","V14","V15","V16","V17","V19","V20","V21","V22","V23",
-                              "V27","V28","V29","V50")
+                                     "V13","V14","V15","V16","V17","V19","V20","V21","V22","V23",
+                                     "V27","V28","V29","V50")
 for(i in 1:ncol(data)){
   data[is.na(data[,i]), i] <- mean(data[,i], na.rm = TRUE)
 }
 
 
-dataM <- data[V1=='1',]
-quantDataM <- dataM %>% dplyr::select("V24","V30","V31","V32","V33",
-                                      "V34","V35","V36","V37","V38","V39","V40","V41","V42","V43","V44",
-                                      "V45")
+data <- data[V1=='1',]
 
 quantData <- data %>% dplyr::select("V24","V30","V31","V32","V33",
-                               "V34","V35","V36","V37","V38","V39","V40","V41","V42","V43","V44",
-                               "V45")
+                                    "V34","V35","V36","V37","V38","V39","V40","V41","V42","V43","V44",
+                                    "V45")
 
 quanti_var <- c('V24','V30','V31','V32','V33',
                 'V34','V35','V36','V37','V38','V39','V40','V41','V42','V43','V44',
@@ -261,142 +258,9 @@ print(auc)
 AUC <- function(ROCx, ROCy)
 {
   n <- length(ROCx)
-  base <-   ROCx[2:n]-ROCx[1:(n-1)]
+  base <-   ROCx[1:(n-1)])-ROCx[2:n]
   height <- ROCy[2:n]
   return(sum(base*height))
 }
 auc <- AUC(ROCx = ROC$spec, ROCy = ROC$sens)
 print(auc)
-
-#-----------------------------------------------------# 
-#           Linear Discriminant Analysis              #
-#-----------------------------------------------------# 
-
-quantData <- scale(quantData) 
-
-g <- 2
-n <- dim(data)[1]
-
-lda_full <- lda(x=quantData, grouping =V50 )
-
-#---------------------------------------------#
-#            Canonical variable               #
-#---------------------------------------------#
-
-print(lda_full$scaling)
-print(sort(lda_full$scaling))
-plot(lda_full)
-
-pdf("ldaSuppressing.pdf")
-plot(lda_full$scaling)
-abline(h = mean(lda_full$scaling), col = "black")
-abline(h = max(lda_full$scaling), col = "black")
-abline(h = min(lda_full$scaling), col = "black")
-abline(h = (mean(lda_full$scaling)+min(lda_full$scaling)/2), col = "blue")
-abline(h = (mean(lda_full$scaling)+max(lda_full$scaling)/2), col = "blue")
-abline(h = mean(lda_full$scaling)+0.2, col = "red")
-abline(h = mean(lda_full$scaling)-0.2, col = "red")
-dev.off()
-## Scores
-scores <- as.matrix(quantData) %*% cbind(lda_full$scaling)
-
-pdf("lda_full_scatter.pdf")
-plot(scores, V50)
-dev.off()
-
-pdf("lda_full_boxplot.pdf")
-boxplot(scores ~ V50)
-dev.off()
-
-## Power
-l1 <- (g - 1) * lda_full$svd[1]^2 / n
-gamma1 <- l1 / (1 + l1)
-print(gamma1)
-
-# 2. Leave one out
-p <- length(quanti_var)
-
-gamma = rep(0, p)
-
-for (i in 1:p) {
-  index <- rep(TRUE, p)
-  index[i] = FALSE
-  
-  lda_partial <- lda(x=quantData[, index], grouping=V50)
-  l <- (g - 1) * lda_partial$svd[1]^2 / n
-  gamma[i] <- l / (1 + l)
-}
-lda_partial
-cbind(quanti_var, gamma)
-
-quanti_var <- c('V24','V30','V32','33','V36','V38','V39','V41','V45')
-quantData <- data %>% dplyr::select("V24","V30","V32","V33","V36","V38","V39","V41","V45")
-quantData <- scale(quantData)
-lda_final <- lda(x=quantData, grouping=V50)
-
-## Canonical variable
-print(lda_final$scaling)
-plot(lda_final)
-## Power
-l <- (g - 1) * lda_final$svd[1]^2 / n
-gamma <- l / (1 + l)
-print(gamma)
-
-## Scores
-scores <- as.matrix(quantData) %*% cbind(lda_final$scaling)
-
-# 3. Classification
-
-## Prior
-table(V50) / length(V50)
-
-## Leave-one-out
-
-pred <- rep(0, n)
-
-for (i in 1:n) {
-  index <- rep(TRUE, n)
-  index[i] <- FALSE
-  
-  lda <- lda(x=quantData[index,], grouping=V50[index])
-  
-  scores <- as.matrix(quantData[index,]) %*% cbind(lda$scaling)
-  
-  g0 <- scores[V50[index] == 0]
-  g1 <- scores[V50[index] == 1]
-  
-  mu0 <- mean(g0)
-  mu1 <- mean(g1)
-  
-  z <- sum(quantData[i,] * cbind(lda$scaling))
-  
-  pred[i] <- abs(z - mu1) < abs(z - mu0)
-}
-lda$scaling
-
-
-
-## Confusion matrix
-conf_mat <- table(V50, pred)
-
-print(conf_mat)
-
-# 4. Homoscedasticity
-
-cov <- cov(quantData[V50 == 0,])
-pdf("cov_group_false.pdf")
-corrplot(cov, is.corr=FALSE, method = "circle", type = "lower", tl.col = "black", tl.pos = "ld", tl.srt = 45)
-dev.off()
-
-cov <- cov(quantData[V50 == 1,])
-pdf("cov_group_true.pdf")
-corrplot(cov, is.corr=FALSE, method = "circle", type = "lower", tl.col = "black", tl.pos = "ld", tl.srt = 45)
-dev.off()
-
-var(g0)
-var(g1) 
-mean(g0)
-mean(g1)
-pdf("lda.pdf")
-plot(lda_final)
-dev.off()
