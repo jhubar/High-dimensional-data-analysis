@@ -73,7 +73,11 @@ explanatory_var <- quanti_var
 #---------------------------------------------#
 #               Complete model                #
 #---------------------------------------------#
-glm1 <- glm(V50 ~ V24+V30+V31+V32+V33+V34+V35+V36+V37+V38+V39+V40+V41+V42+V43+V44+V45, family = binomial(link = "logit"))
+test <- glm(data$V50~., family = binomial(link = "logit"), data = data)
+summary(test)
+stepAIC(test)
+
+glm1 <- glm(V50 ~ V24+V30+V31+V32+V33+V34+V35+V36+V37+V38+V39+V40+V41+V42+V43+V44+V45, family = binomial(link = "logit"),data = quantData)
 
 summary(glm1)
 plot(glm1$linear.predictors,fit1$fitted ,col = colors.th)
