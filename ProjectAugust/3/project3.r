@@ -228,7 +228,7 @@ for (i in 1:dim(data_Updated)[1]) {
   LOO_Post[i] <- exp(prediction)/(1 + exp(prediction))
 }
 
-# Construct confusion matrix
+#  Confusion matrix
 threshold = 0.38
 Actual<- V50
 Predicted <- as.integer(LOO_Post> threshold)
@@ -236,7 +236,7 @@ conf_mat <- table(V50,Predicted)
 (40/165)*100 - mean(errors)*100
 
 
-# Compute sensitivity and specificity
+# sensitivity and specificity
 sens_or_spec <- function(confusion_matrix, spec = FALSE) {
   if (spec) {
     specificity <- (confusion_matrix[1,1])/(confusion_matrix[1,1] + confusion_matrix[1,2])
