@@ -7,4 +7,4 @@
 [Raport p3](https://www.overleaf.com/9584912725pgqvrvcmkjnf)
 
 # Author
-[Julien Hubar](https://github.com/jhubar)
+[Julien Hubar](https://jhubar.github.io)
